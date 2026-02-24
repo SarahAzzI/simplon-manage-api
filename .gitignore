@@ -22,3 +22,4 @@ alembic/versions/*.pyc
 
 # OS
 .DS_Store
+.venv
