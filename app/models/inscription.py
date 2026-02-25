@@ -6,7 +6,7 @@ from enum import Enum
 
 class Inscritpion():
 
-    __table__ = "inscritpion"
+    __table__ = "inscritpions"
 
     id = Column(Integer, primary_key=True, nullable=False)
     session_id = Column(Integer, ForeignKey('sessions.id'), nullable=False)
