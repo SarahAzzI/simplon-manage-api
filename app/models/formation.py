@@ -13,6 +13,6 @@ class Formation(Base):
 
     id = Column(Integer, primary_key=True, nullable=False)
     title = Column(String, index=True, nullable=False)
-    description = Column(String, nullable=True)
+    description = Column(String, nullable=False)
     duration = Column(Integer, nullable=False)
     level = Column(SAEnum(Niveau), nullable=False)
