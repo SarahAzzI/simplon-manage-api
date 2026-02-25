@@ -19,14 +19,6 @@ class SessionCreate(BaseModel):
             raise ValueError("La capacité doit être >= 1")
         return v
 
-    @model_validator(mode="after")
-    def dates_coherentes(self):
-        if self.date_fin <= self.date_debut:
-            raise ValueError(
-                "La date de fin doit être postérieure à la date de début"
-            )
-        return self
-
 
 # ── MISE À JOUR ──
 class SessionUpdate(BaseModel):
