@@ -4,15 +4,15 @@ from sqlalchemy import Enum as SAEnum
 from enum import Enum
 
 class Niveau(str, Enum):
-    debutant = "débutant"
-    intermédiaire = "intermédiaire"
-    avancé = "avancé"
+    beginner = "débutant"
+    intermediate = "intermédiaire"
+    advance = "avancé"
 
 class Formation(Base):
-    __tablename__ = "formation"
+    __tablename__ = "formations"
 
-    id = Column(Integer, primary_key=True)
-    titre = Column(String, index=True, nullable=True)
+    id = Column(Integer, primary_key=True, nullable=False)
+    title = Column(String, index=True, nullable=False)
     description = Column(String, nullable=True)
-    duree = Column(Integer)
-    niveau = Column(SAEnum(Niveau))
+    duration = Column(Integer, nullable=False)
+    level = Column(SAEnum(Niveau), nullable=False)

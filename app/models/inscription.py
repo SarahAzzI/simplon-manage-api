@@ -8,9 +8,9 @@ class Inscritpion():
 
     __table__ = "inscritpion"
 
-    id = Column(Integer, primary_key=True)
+    id = Column(Integer, primary_key=True, nullable=False)
     session_id = Column(Integer, ForeignKey('sessions.id'), nullable=False)
     user_id = Column(Integer, ForeignKey('users.id'), nullable=False)
-    date_debut = Column(DateTime)
-    date_fin = Column(DateTime)
-    capacitée_max = Column(Integer)
+    date_debut = Column(DateTime, nullable=False)
+    date_fin = Column(DateTime, nullable=False)
+    capacitée_max = Column(Integer, nullable=False)
