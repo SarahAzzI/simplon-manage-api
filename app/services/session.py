@@ -3,7 +3,7 @@ from sqlalchemy import select, func
 
 from app.models.session import SessionFormation
 from app.models.inscription import Inscription
-from app.models.user import User, RoleEnum              # ← user.py
+from app.models.user import User, RoleEnum  # ← user.py
 from app.schemas.session import SessionCreate, SessionUpdate
 from app.exceptions import NotFoundException, BadRequestException
 
@@ -27,9 +27,7 @@ class SessionService:
         if formateur_id:
             query = query.where(SessionFormation.formateur_id == formateur_id)
 
-        total = db.scalar(
-            select(func.count()).select_from(query.subquery())
-        )
+        total = db.scalar(select(func.count()).select_from(query.subquery()))
 
         offset = (page - 1) * size
         sessions = (
@@ -87,7 +85,13 @@ class SessionService:
 
         # Vérifier que la formation existe
         from app.services.formation import FormationService
+
         FormationService.get_by_id(db, data.formation_id)
+
+        # Valider la cohérence métier
+        SessionService._validate_session(
+            db, data.date_debut, data.date_fin, data.capacite_max
+        )
 
         # Créer
         session = SessionFormation(**data.model_dump())
@@ -98,9 +102,7 @@ class SessionService:
 
     # ── MODIFIER ──
     @staticmethod
-    def update(
-        db: Session, session_id: int, data: SessionUpdate
-    ) -> SessionFormation:
+    def update(db: Session, session_id: int, data: SessionUpdate) -> SessionFormation:
 
         session = SessionService.get_by_id(db, session_id)
 
@@ -117,26 +119,19 @@ class SessionService:
         # Valider formation si modifiée
         if data.formation_id is not None:
             from app.services.formation import FormationService
+
             FormationService.get_by_id(db, data.formation_id)
 
         update_data = data.model_dump(exclude_unset=True)
 
-        # Vérifier cohérence des dates
+        # Valider la cohérence métier (dates et capacité)
         new_debut = update_data.get("date_debut", session.date_debut)
         new_fin = update_data.get("date_fin", session.date_fin)
-        if new_fin <= new_debut:
-            raise BadRequestException(
-                "La date de fin doit être postérieure à la date de début"
-            )
+        new_capacite = update_data.get("capacite_max", session.capacite_max)
 
-        # Vérifier capacité vs inscrits
-        if "capacite_max" in update_data:
-            nb_inscrits = SessionService.count_inscrits(db, session_id)
-            if update_data["capacite_max"] < nb_inscrits:
-                raise BadRequestException(
-                    f"Impossible : {nb_inscrits} apprenants déjà inscrits, "
-                    f"capacité demandée : {update_data['capacite_max']}"
-                )
+        SessionService._validate_session(
+            db, new_debut, new_fin, new_capacite, session_id
+        )
 
         # Appliquer
         for key, value in update_data.items():
@@ -157,10 +152,38 @@ class SessionService:
     @staticmethod
     def count_inscrits(db: Session, session_id: int) -> int:
         return (
-            db.scalar(
-                select(func.count()).where(
-                    Inscription.session_id == session_id
-                )
-            )
+            db.scalar(select(func.count()).where(Inscription.session_id == session_id))
             or 0
         )
+
+    # ── VALIDATION MÉTIER CENTRALISÉE ──
+    @staticmethod
+    def _validate_session(
+        db: Session,
+        date_debut: date,
+        date_fin: date,
+        capacite_max: int,
+        session_id: int | None = None,
+    ) -> None:
+        """
+        Regroupe les règles de cohérence qui ne peuvent pas être
+        vérifiées par le schéma Pydantic seul (ou pour garantir la sécurité du service).
+        """
+
+        # 1. Cohérence des dates
+        if date_fin <= date_debut:
+            raise BadRequestException(
+                "La date de fin doit être postérieure à la date de début"
+            )
+
+        # 2. Cohérence capacité (si session existante)
+        if session_id is not None:
+            nb_inscrits = SessionService.count_inscrits(db, session_id)
+            if capacite_max < nb_inscrits:
+                raise BadRequestException(
+                    f"Impossible de réduire la capacité : {nb_inscrits} apprenants "
+                    f"sont déjà inscrits à cette session."
+                )
+        elif capacite_max < 1:
+            # Sécurité supplémentaire si le schéma est contourné
+            raise BadRequestException("La capacité doit être au moins de 1.")
