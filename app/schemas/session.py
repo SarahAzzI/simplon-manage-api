@@ -1,17 +1,20 @@
-from datetime import date
+from datetime import date, datetime
 from pydantic import BaseModel, model_validator, field_validator, ConfigDict
 from app.schemas.utilisateur import UtilisateurRead
 from app.schemas.formation import FormationRead
 
 
-# ── CRÉATION ──
-class SessionCreate(BaseModel):
+# ── BASE ──
+class SessionBase(BaseModel):
     formation_id: int
     formateur_id: int
     date_debut: date
     date_fin: date
     capacite_max: int
 
+
+# ── CRÉATION ──
+class SessionCreate(SessionBase):
     @field_validator("capacite_max")
     @classmethod
     def capacite_valide(cls, v: int) -> int:
@@ -37,16 +40,13 @@ class SessionUpdate(BaseModel):
 
 
 # ── LECTURE ──
-class SessionRead(BaseModel):
+class SessionRead(SessionBase):
     model_config = ConfigDict(from_attributes=True)
 
     id: int
-    formation_id: int
-    formateur_id: int
-    date_debut: date
-    date_fin: date
-    capacite_max: int
     nombre_inscrits: int = 0
+    created_at: datetime
+    updated_at: datetime
 
 
 # ── LECTURE DÉTAILLÉE ──
