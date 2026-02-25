@@ -15,17 +15,14 @@ from app.services.session import SessionService
 router = APIRouter(prefix="/sessions", tags=["Sessions"])
 
 
-# GET /sessions/
 @router.get("/", response_model=PaginatedResponse[SessionRead])
 def lister_sessions(
-    page: int = Query(1, ge=1, description="Numéro de page"),
-    size: int = Query(20, ge=1, le=100, description="Taille de page"),
-    formation_id: int | None = Query(None, description="Filtrer par formation"),
-    formateur_id: int | None = Query(None, description="Filtrer par formateur"),
+    page: int = Query(1, ge=1),
+    size: int = Query(20, ge=1, le=100),
+    formation_id: int | None = Query(None),
+    formateur_id: int | None = Query(None),
     db: Session = Depends(get_db),
 ):
-    """Lister toutes les sessions avec pagination et filtres."""
-
     results, total = SessionService.get_all(
         db, page, size, formation_id, formateur_id
     )
@@ -45,13 +42,8 @@ def lister_sessions(
     )
 
 
-# GET /sessions/{id}
 @router.get("/{session_id}", response_model=SessionDetailRead)
-def obtenir_session(
-    session_id: int, db: Session = Depends(get_db)
-):
-    """Obtenir le détail d'une session (avec formation et formateur)."""
-
+def obtenir_session(session_id: int, db: Session = Depends(get_db)):
     session = SessionService.get_by_id(db, session_id)
     nb = SessionService.count_inscrits(db, session_id)
     result = SessionDetailRead.model_validate(session)
@@ -59,40 +51,18 @@ def obtenir_session(
     return result
 
 
-# POST /sessions/
-@router.post(
-    "/",
-    response_model=SessionRead,
-    status_code=status.HTTP_201_CREATED,
-)
-def creer_session(
-    data: SessionCreate, db: Session = Depends(get_db)
-):
-    """Créer une nouvelle session de formation."""
-
+@router.post("/", response_model=SessionRead, status_code=status.HTTP_201_CREATED)
+def creer_session(data: SessionCreate, db: Session = Depends(get_db)):
     return SessionService.create(db, data)
 
 
-# PUT /sessions/{id}
-
 @router.put("/{session_id}", response_model=SessionRead)
 def modifier_session(
-    session_id: int,
-    data: SessionUpdate,
-    db: Session = Depends(get_db),
+    session_id: int, data: SessionUpdate, db: Session = Depends(get_db)
 ):
-    """Modifier une session existante."""
-
     return SessionService.update(db, session_id, data)
 
 
-# DELETE /sessions/{id}
-@router.delete(
-    "/{session_id}", status_code=status.HTTP_204_NO_CONTENT
-)
-def supprimer_session(
-    session_id: int, db: Session = Depends(get_db)
-):
-    """Supprimer une session."""
-
+@router.delete("/{session_id}", status_code=status.HTTP_204_NO_CONTENT)
+def supprimer_session(session_id: int, db: Session = Depends(get_db)):
     SessionService.delete(db, session_id)

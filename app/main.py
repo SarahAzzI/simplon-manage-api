@@ -1,6 +1,6 @@
 
 from fastapi import FastAPI
-from app.routes import utilisateur, formation, session, inscription
+from app.routes import user, formation, session, inscription
 
 app = FastAPI(
     title="API Centre de Formation — Simplon",
@@ -12,7 +12,7 @@ app = FastAPI(
 # Chaque ligne connecte un fichier routes/*.py à l'API
 # Sans ces lignes → les endpoints n'existent PAS
 
-app.include_router(utilisateur.router)   # → /utilisateurs/
+app.include_router(user.router)   # → /utilisateurs/
 app.include_router(formation.router)     # → /formations/
 app.include_router(session.router)       # → /sessions/
 app.include_router(inscription.router)   # → /inscriptions/

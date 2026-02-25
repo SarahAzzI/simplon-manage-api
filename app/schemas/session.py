@@ -4,7 +4,7 @@ from app.schemas.utilisateur import UtilisateurRead
 from app.schemas.formation import FormationRead
 
 
-# DTO CRÉATION
+# ── CRÉATION ──
 class SessionCreate(BaseModel):
     formation_id: int
     formateur_id: int
@@ -28,7 +28,7 @@ class SessionCreate(BaseModel):
         return self
 
 
-# DTO MISE À JOUR (tous champs optionnels)
+# ── MISE À JOUR ──
 class SessionUpdate(BaseModel):
     formation_id: int | None = None
     formateur_id: int | None = None
@@ -44,7 +44,7 @@ class SessionUpdate(BaseModel):
         return v
 
 
-# DTO LECTURE (réponse simple)
+# ── LECTURE ──
 class SessionRead(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
@@ -57,7 +57,7 @@ class SessionRead(BaseModel):
     nombre_inscrits: int = 0
 
 
-# DTO LECTURE DÉTAILLÉE (avec objets imbriqués)
+# ── LECTURE DÉTAILLÉE ──
 class SessionDetailRead(SessionRead):
     formation: FormationRead
     formateur: UtilisateurRead

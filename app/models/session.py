@@ -18,37 +18,18 @@ class SessionFormation(Base):
         ForeignKey("utilisateurs.id", ondelete="CASCADE"),
         nullable=False,
     )
-    date_debut: Mapped[date] = mapped_column(
-        Date, nullable=False
-    )
-    date_fin: Mapped[date] = mapped_column(
-        Date, nullable=False
-    )
-    capacite_max: Mapped[int] = mapped_column(
-        Integer, nullable=False
-    )
+    date_debut: Mapped[date] = mapped_column(Date, nullable=False)
+    date_fin: Mapped[date] = mapped_column(Date, nullable=False)
+    capacite_max: Mapped[int] = mapped_column(Integer, nullable=False)
 
-    # Contraintes au niveau BDD
     __table_args__ = (
-        CheckConstraint(
-            "date_fin > date_debut",
-            name="check_dates_coherentes",
-        ),
-        CheckConstraint(
-            "capacite_max >= 1",
-            name="check_capacite_positive",
-        ),
+        CheckConstraint("date_fin > date_debut", name="check_dates_coherentes"),
+        CheckConstraint("capacite_max >= 1", name="check_capacite_positive"),
     )
 
-    # ── Relations ──
-    formation = relationship(
-        "Formation",
-        back_populates="sessions",
-    )
-    formateur = relationship(
-        "Utilisateur",
-        back_populates="sessions_animees",
-    )
+    # Relations
+    formation = relationship("Formation", back_populates="sessions")
+    formateur = relationship("User", back_populates="sessions_animees")
     inscriptions = relationship(
         "Inscription",
         back_populates="session",
