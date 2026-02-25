@@ -1,36 +1,37 @@
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, EmailStr, Field, ConfigDict
 from datetime import datetime
-from enum import Enum
+from typing import Optional
+from models.user import Role
 
-class UserCreate(BaseModel):
+
+class UserBase(BaseModel):
+
     email: EmailStr
-    surname: str
-    name: str
+    surname: str = Field(min_length=2, max_length=100)
+    name: str = Field(min_length=2, max_length=100)
     birth_date: datetime
-    role: str
-    
-    
+    role: Role
 
-class UserRead(BaseModel):
+
+class UserCreate(UserBase):
+   
+    pass
+
+
+class UserRead(UserBase):
     id: int
-    email: EmailStr
-    surname: str
-    name: str
-    birth_date: datetime
-    role: str
     inscription_date: datetime
     is_active: bool
 
-    class Config:
-        from_attributes = True 
+    model_config = ConfigDict(from_attributes=True)
 
 
 class UserUpdate(BaseModel):
     email: EmailStr | None = None
-    surname: str | None = None
-    name: str | None = None
+    surname: str | None = Field(default=None, min_length=2, max_length=100)
+    name: str | None = Field(default=None, min_length=2, max_length=100)
     birth_date: datetime | None = None
-    role: str | None = None
+    role: Role | None = None
     is_active: bool | None = None
 
 
@@ -38,4 +39,3 @@ class UserDelete(BaseModel):
     message: str
     user_id: int
     delete_type: str
-    

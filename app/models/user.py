@@ -19,4 +19,4 @@ class User(Base):
     birth_date = Column(DateTime, nullable=False)
     role = Column(SAEnum(Role), nullable=False)
     inscription_date = Column(DateTime, default=lambda: datetime.now(timezone.utc))
-    is_active = Column(Boolean, default=True)  # True for actif, False for inactif
+    is_active = Column(Boolean, default=True)  # True for actif, False for inactif. 
