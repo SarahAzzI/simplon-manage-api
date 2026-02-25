@@ -15,7 +15,7 @@ class SessionFormation(Base):
         nullable=False,
     )
     formateur_id: Mapped[int] = mapped_column(
-        ForeignKey("utilisateurs.id", ondelete="CASCADE"),
+        ForeignKey("users.id", ondelete="CASCADE"),       # ← corrigé
         nullable=False,
     )
     date_debut: Mapped[date] = mapped_column(Date, nullable=False)
