@@ -14,7 +14,7 @@ class SessionService:
 
     # ── LISTER ──
     @staticmethod
-    def get_all(
+    def list(
         db: Session,
         page: int = 1,
         size: int = 20,

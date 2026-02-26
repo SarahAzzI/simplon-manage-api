@@ -24,7 +24,7 @@ def lister_sessions(
     formateur_id: Optional[int] = Query(None),
     db: Session = Depends(get_db),
 ):
-    results, total = SessionService.get_all(
+    results, total = SessionService.list(
         db, page, size, formation_id, formateur_id
     )
 
