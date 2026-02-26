@@ -9,7 +9,7 @@ from app.core.exceptions import NotFoundException, BadRequestException
 class InscriptionService:
 
     @staticmethod
-    def create_inscription(db: Session, data: InscriptionCreate) -> Inscription:
+    def create(db: Session, data: InscriptionCreate) -> Inscription:
         # 1. Vérifier si l'apprenant existe
         user = db.get(User, data.user_id)
         if not user:
@@ -48,7 +48,7 @@ class InscriptionService:
         return inscription
 
     @staticmethod
-    def get_inscriptions_by_session(db: Session, session_id: int) -> list[Inscription]:
+    def get_by_session(db: Session, session_id: int) -> list[Inscription]:
         # Vérifier si la session existe
         session = db.get(SessionFormation, session_id)
         if not session:
@@ -61,7 +61,7 @@ class InscriptionService:
         ).all()
 
     @staticmethod
-    def get_sessions_by_student(db: Session, user_id: int) -> list[Inscription]:
+    def get_by_student(db: Session, user_id: int) -> list[Inscription]:
         # Vérifier si l'apprenant existe
         user = db.get(User, user_id)
         if not user:
@@ -74,7 +74,7 @@ class InscriptionService:
         ).all()
 
     @staticmethod
-    def delete_inscription(db: Session, inscription_id: int) -> None:
+    def delete(db: Session, inscription_id: int) -> None:
         inscription = db.get(Inscription, inscription_id)
         if not inscription:
             raise NotFoundException("Inscription", inscription_id)
@@ -83,7 +83,7 @@ class InscriptionService:
         db.commit()
 
     @staticmethod
-    def update_inscription(db: Session, inscription_id: int, data: InscriptionUpdate) -> Inscription:
+    def update(db: Session, inscription_id: int, data: InscriptionUpdate) -> Inscription:
         inscription = db.get(Inscription, inscription_id)
         if not inscription:
             raise NotFoundException("Inscription", inscription_id)

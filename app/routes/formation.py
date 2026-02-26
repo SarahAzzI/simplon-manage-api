@@ -15,7 +15,7 @@ def create_formation_route(formation: FormationCreate, db: Session = Depends(get
 @router.get("/", response_model=PaginatedResponse[FormationResponse])
 def get_formations_route(page: int = Query(1, ge=1), size: int = Query(10, ge=1, le=100), db: Session = Depends(get_db)):
     skip = (page - 1) * size
-    items = FormationService.get_all(db, skip=skip, limit=size)
+    items = FormationService.list(db, skip=skip, limit=size)
     total = FormationService.get_total(db)
     pages = math.ceil(total / size)
     return {"items": items, "total": total, "page": page, "size": size, "pages": pages}
