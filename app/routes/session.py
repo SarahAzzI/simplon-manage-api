@@ -1,4 +1,5 @@
 import math
+from typing import Optional
 from fastapi import APIRouter, Depends, Query, status
 from sqlalchemy.orm import Session
 
@@ -19,8 +20,8 @@ router = APIRouter(prefix="/sessions", tags=["Sessions"])
 def lister_sessions(
     page: int = Query(1, ge=1),
     size: int = Query(20, ge=1, le=100),
-    formation_id: int | None = Query(None),
-    formateur_id: int | None = Query(None),
+    formation_id: Optional[int] = Query(None),
+    formateur_id: Optional[int] = Query(None),
     db: Session = Depends(get_db),
 ):
     results, total = SessionService.get_all(

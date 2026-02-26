@@ -1,4 +1,5 @@
 from datetime import date
+from typing import Optional, Tuple, List, Dict
 from sqlalchemy.orm import Session, joinedload
 from sqlalchemy import select, func
 
@@ -17,9 +18,9 @@ class SessionService:
         db: Session,
         page: int = 1,
         size: int = 20,
-        formation_id: int | None = None,
-        formateur_id: int | None = None,
-    ) -> tuple[list[dict], int]:
+        formation_id: Optional[int] = None,
+        formateur_id: Optional[int] = None,
+    ) -> Tuple[List[Dict], int]:
 
         query = select(SessionFormation)
 
@@ -165,7 +166,7 @@ class SessionService:
         date_debut: date,
         date_fin: date,
         capacite_max: int,
-        session_id: int | None = None,
+        session_id: Optional[int] = None,
     ) -> None:
         """
         Regroupe les règles de cohérence qui ne peuvent pas être

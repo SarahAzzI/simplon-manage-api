@@ -1,3 +1,4 @@
+from typing import Optional, List
 from sqlalchemy.orm import Session
 from app.models.user import User
 from app.schemas.user import UserCreate, UserUpdate
@@ -15,13 +16,13 @@ def create_user(db: Session, user: UserCreate) -> User:
     db.refresh(new_user)
     return new_user
 
-def get_user(db: Session, user_id: int) -> User | None:
+def get_user(db: Session, user_id: int) -> Optional[User]:
     return db.query(User).filter(User.id == user_id).first()
 
-def get_users(db: Session, skip: int = 0, limit: int = 100) -> list[User]:
+def get_users(db: Session, skip: int = 0, limit: int = 100) -> List[User]:
     return db.query(User).offset(skip).limit(limit).all()
 
-def update_user(db: Session, user_id: int, user_data: UserUpdate) -> User | None:
+def update_user(db: Session, user_id: int, user_data: UserUpdate) -> Optional[User]:
     user = get_user(db, user_id)
     if not user:
         return None
@@ -32,7 +33,7 @@ def update_user(db: Session, user_id: int, user_data: UserUpdate) -> User | None
     db.refresh(user)
     return user
     
-def soft_delete_user(db: Session, user_id: int) -> User | None:
+def soft_delete_user(db: Session, user_id: int) -> Optional[User]:
         user = get_user(db, user_id)
         if not user:
             return None

@@ -27,12 +27,12 @@ class UserResponse(UserBase):
 
 
 class UserUpdate(BaseModel):
-    email: EmailStr | None = None
-    surname: str | None = Field(default=None, min_length=2, max_length=100)
-    name: str | None = Field(default=None, min_length=2, max_length=100)
-    birth_date: datetime | None = None
-    role: Role | None = None
-    is_active: bool | None = None
+    email: Optional[EmailStr] = None
+    surname: Optional[str] = Field(default=None, min_length=2, max_length=100)
+    name: Optional[str] = Field(default=None, min_length=2, max_length=100)
+    birth_date: Optional[datetime] = None
+    role: Optional[Role] = None
+    is_active: Optional[bool] = None
 
 
 class UserDelete(BaseModel):
