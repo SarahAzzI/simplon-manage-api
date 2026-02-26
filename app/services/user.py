@@ -1,22 +1,31 @@
 from typing import Optional, List
 from sqlalchemy.orm import Session
+from sqlalchemy.exc import IntegrityError
+from fastapi import HTTPException, status
 from app.models.user import User
 from app.schemas.user import UserCreate, UserUpdate
 
 class UserService:
     @staticmethod
     def create(db: Session, user: UserCreate) -> User:
-        new_user = User(
-            email=user.email,
-            surname=user.surname,
-            name=user.name,
-            birth_date=user.birth_date,
-            role=user.role
-        )
-        db.add(new_user)
-        db.commit()
-        db.refresh(new_user)
-        return new_user
+        try:
+            new_user = User(
+                email=user.email,
+                surname=user.surname,
+                name=user.name,
+                birth_date=user.birth_date,
+                role=user.role
+            )
+            db.add(new_user)
+            db.commit()
+            db.refresh(new_user)
+            return new_user
+        except IntegrityError:
+            db.rollback()
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Un utilisateur avec cet email existe déjà"
+            )
 
     @staticmethod
     def get_by_id(db: Session, user_id: int) -> Optional[User]:
