@@ -1,0 +1,20 @@
+0 verbose cli /usr/local/bin/node /usr/local/lib/node_modules/npm/bin/npm-cli.js
+1 info using npm@11.6.4
+2 info using node@v22.18.0
+3 silly config load:file:/usr/local/lib/node_modules/npm/npmrc
+4 silly config load:file:/Users/amaury/Desktop/simplon-manage-api/simplon-manage-api/frontend/.npmrc
+5 silly config load:file:/Users/amaury/.npmrc
+6 silly config load:file:/usr/local/etc/npmrc
+7 verbose title npm exec shadcn@latest add button card table --yes
+8 verbose argv "exec" "--" "shadcn@latest" "add" "button" "card" "table" "--yes"
+9 verbose logfile logs-max:10 dir:/Users/amaury/Desktop/simplon-manage-api/simplon-manage-api/frontend/.npm-cache/_logs/2026-02-26T16_45_41_213Z-
+10 verbose logfile /Users/amaury/Desktop/simplon-manage-api/simplon-manage-api/frontend/.npm-cache/_logs/2026-02-26T16_45_41_213Z-debug-0.log
+11 silly logfile done cleaning log files
+12 silly packumentCache heap:4345298944 maxSize:1086324736 maxEntrySize:543162368
+13 http fetch GET 200 https://registry.npmjs.org/shadcn 90ms (cache revalidated)
+14 verbose cwd /Users/amaury/Desktop/simplon-manage-api/simplon-manage-api/frontend
+15 verbose os Darwin 25.3.0
+16 verbose node v22.18.0
+17 verbose npm  v11.6.4
+18 verbose exit 0
+19 info ok
