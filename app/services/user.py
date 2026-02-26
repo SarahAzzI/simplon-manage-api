@@ -23,7 +23,7 @@ class UserService:
         return db.query(User).filter(User.id == user_id).first()
 
     @staticmethod
-    def get_all(db: Session, skip: int = 0, limit: int = 100) -> List[User]:
+    def list(db: Session, skip: int = 0, limit: int = 100) -> List[User]:
         return db.query(User).offset(skip).limit(limit).all()
 
     @staticmethod

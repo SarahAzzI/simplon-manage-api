@@ -22,7 +22,7 @@ def read_user(user_id: int, db: Session = Depends(get_db)):
 
 @router.get("/", response_model=list[UserResponse])
 def read_users(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
-    return UserService.get_all(db, skip, limit)  
+    return UserService.list(db, skip, limit)  
 
 @router.patch("/{user_id}", response_model=UserResponse)
 def update_user(user_id: int, user: UserUpdate, db: Session = Depends(get_db)):

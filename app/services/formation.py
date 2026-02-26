@@ -23,7 +23,7 @@ class FormationService:
         return db.query(Formation).filter(Formation.id == formation_id).first()
 
     @staticmethod
-    def get_all(db: Session, skip: int = 0, limit: int = 100) -> List[Formation]:
+    def list(db: Session, skip: int = 0, limit: int = 100) -> List[Formation]:
         return db.query(Formation).offset(skip).limit(limit).all()
 
     @staticmethod
