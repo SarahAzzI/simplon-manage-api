@@ -91,3 +91,94 @@ def test_hard_delete_user(client, db):
     # Verify truly deleted
     get_resp = client.get(f"/utilisateurs/{user_id}")
     assert get_resp.status_code == 404
+
+def test_create_user_invalid_email(client, db):
+    """Email invalide doit échouer"""
+    response = client.post("/utilisateurs/", json={
+        "email": "pas-un-email",
+        "surname": "Test",
+        "name": "User",
+        "birth_date": "1990-01-01T00:00:00",
+        "role": "Etudiant"
+    })
+    assert response.status_code == 422  # Erreur de validation
+
+
+def test_create_user_missing_field(client, db):
+    """Champ obligatoire manquant doit échouer"""
+    response = client.post("/utilisateurs/", json={
+        "email": "test@test.com",
+        "name": "User",
+        "birth_date": "1990-01-01T00:00:00",
+        "role": "Etudiant"
+    })
+    assert response.status_code == 422
+
+
+def test_create_user_invalid_role(client, db):
+    """Rôle invalide doit échouer"""
+    response = client.post("/utilisateurs/", json={
+        "email": "role@test.com",
+        "surname": "Test",
+        "name": "User",
+        "birth_date": "1990-01-01T00:00:00",
+        "role": "RoleInvalide"
+    })
+    assert response.status_code == 422
+
+
+def test_list_users_pagination(client, db):
+    """Test skip et limit"""
+    for i in range(5):
+        client.post("/utilisateurs/", json={
+            "email": f"page{i}@test.com",
+            "surname": f"User{i}",
+            "name": "Test",
+            "birth_date": "1990-01-01T00:00:00",
+            "role": "Etudiant"
+        })
+    
+    response = client.get("/utilisateurs/?limit=2")
+    assert response.status_code == 200
+    assert len(response.json()) == 2
+    
+    response = client.get("/utilisateurs/?skip=3")
+    assert response.status_code == 200
+    assert len(response.json()) == 2
+
+def test_create_user_all_roles(client, db):
+    """Test création avec chaque rôle"""
+    roles = ["Etudiant", "Formateur", "Administrateur"]
+    
+    for i, role in enumerate(roles):
+        response = client.post("/utilisateurs/", json={
+            "email": f"role{i}@test.com",
+            "surname": "Test",
+            "name": "User",
+            "birth_date": "1990-01-01T00:00:00",
+            "role": role
+        })
+        assert response.status_code == 201
+        assert response.json()["role"] == role    
+
+def test_update_user_partial(client, db):
+    """Test modification d'un seul champ"""
+    create_resp = client.post("/utilisateurs/", json={
+        "email": "partial@test.com",
+        "surname": "Original",
+        "name": "Name",
+        "birth_date": "1990-01-01T00:00:00",
+        "role": "Etudiant"
+    })
+    user_id = create_resp.json()["id"]
+    original_surname = create_resp.json()["surname"]
+    
+    # Modifie seulement le name
+    response = client.patch(f"/utilisateurs/{user_id}", json={
+        "name": "NewName"
+    })
+    
+    assert response.status_code == 200
+    assert response.json()["name"] == "NewName"
+    assert response.json()["surname"] == original_surname  # Non modifié
+
