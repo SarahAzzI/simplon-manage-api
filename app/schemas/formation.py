@@ -26,7 +26,7 @@ class FormationUpdate(BaseModel):
     level: Optional[Niveau] = None
 
 # --- READ ---
-class FormationRead(FormationBase):
+class FormationResponse(FormationBase):
     """Schéma pour la réponse API."""
     id: int
     created_at: datetime
@@ -40,7 +40,7 @@ class FormationRead(FormationBase):
 # --- LIST ---
 class FormationList(BaseModel):
     """Schéma pour la pagination."""
-    formations: List[FormationRead]
+    formations: List[FormationResponse]
     total: int
     page: int
     size: int

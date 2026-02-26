@@ -2,7 +2,7 @@ from datetime import date, datetime
 from sqlalchemy import Integer, Date, ForeignKey, CheckConstraint, DateTime
 from sqlalchemy.sql import func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-from db.database import Base
+from app.db.database import Base
 
 
 class SessionFormation(Base):

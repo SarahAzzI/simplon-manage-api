@@ -1,7 +1,7 @@
 from datetime import date, datetime
 from pydantic import BaseModel, model_validator, field_validator, ConfigDict
-from app.schemas.utilisateur import UtilisateurRead
-from app.schemas.formation import FormationRead
+from app.schemas.user import UserResponse
+from app.schemas.formation import FormationResponse
 
 
 # ── BASE ──
@@ -40,7 +40,7 @@ class SessionUpdate(BaseModel):
 
 
 # ── LECTURE ──
-class SessionRead(SessionBase):
+class SessionResponse(SessionBase):
     model_config = ConfigDict(from_attributes=True)
 
     id: int
@@ -50,6 +50,6 @@ class SessionRead(SessionBase):
 
 
 # ── LECTURE DÉTAILLÉE ──
-class SessionDetailRead(SessionRead):
-    formation: FormationRead
-    formateur: UtilisateurRead
+class SessionDetailResponse(SessionResponse):
+    formation: FormationResponse
+    formateur: UserResponse
