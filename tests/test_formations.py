@@ -11,7 +11,7 @@ def test_create_formation(client, db):
             "level": "débutant"
         }
     )
-    assert response.status_code == 200
+    assert response.status_code == 201
     data = response.json()
     assert data["title"] == "Python Basics"
     assert data["duration"] == 40
@@ -31,7 +31,7 @@ def test_get_formations_list(client, db):
     assert response.status_code == 200
     data = response.json()
     assert data["total"] == 2
-    assert len(data["formations"]) == 2
+    assert len(data["items"]) == 2
     assert data["page"] == 1
 
 def test_get_formation_by_id(client, db):
@@ -68,8 +68,7 @@ def test_delete_formation(client, db):
     formation_id = create_resp.json()["id"]
     
     response = client.delete(f"/formations/{formation_id}")
-    assert response.status_code == 200
-    assert response.json()["message"] == "Formation deleted successfully"
+    assert response.status_code == 204
     
     # Verify it's gone
     get_resp = client.get(f"/formations/{formation_id}")
