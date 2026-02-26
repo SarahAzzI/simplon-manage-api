@@ -1,4 +1,5 @@
 from datetime import date, datetime
+from typing import Optional
 from pydantic import BaseModel, model_validator, field_validator, ConfigDict
 from app.schemas.user import UserResponse
 from app.schemas.formation import FormationResponse
@@ -25,15 +26,15 @@ class SessionCreate(SessionBase):
 
 # ── MISE À JOUR ──
 class SessionUpdate(BaseModel):
-    formation_id: int | None = None
-    formateur_id: int | None = None
-    date_debut: date | None = None
-    date_fin: date | None = None
-    capacite_max: int | None = None
+    formation_id: Optional[int] = None
+    formateur_id: Optional[int] = None
+    date_debut: Optional[date] = None
+    date_fin: Optional[date] = None
+    capacite_max: Optional[int] = None
 
     @field_validator("capacite_max")
     @classmethod
-    def capacite_valide(cls, v: int | None) -> int | None:
+    def capacite_valide(cls, v: Optional[int]) -> Optional[int]:
         if v is not None and v < 1:
             raise ValueError("La capacité doit être >= 1")
         return v
