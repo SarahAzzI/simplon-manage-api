@@ -1,7 +1,7 @@
 from pydantic import BaseModel, EmailStr, Field, ConfigDict
 from datetime import datetime
 from typing import Optional
-from models.user import Role
+from app.models.user import Role
 
 
 class UserBase(BaseModel):
@@ -18,7 +18,7 @@ class UserCreate(UserBase):
     pass
 
 
-class UserRead(UserBase):
+class UserResponse(UserBase):
     id: int
     inscription_date: datetime
     is_active: bool

@@ -1,13 +1,13 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
-from db.database import get_db
+from app.db.database import get_db
 from app.services import formation as formation_service
-from app.schemas.formation import FormationCreate, FormationUpdate, FormationRead, FormationList
+from app.schemas.formation import FormationCreate, FormationUpdate, FormationResponse, FormationList
 
 router = APIRouter(prefix="/formations", tags=["Formations"])
 
 
-@router.post("/", response_model=FormationRead)
+@router.post("/", response_model=FormationResponse)
 def create_formation(formation_data: FormationCreate, db: Session = Depends(get_db)):
     return formation_service.create_formation(db, formation_data)
 
@@ -26,7 +26,7 @@ def get_formations(page: int = 1, size: int = 20, db: Session = Depends(get_db))
     }
 
 
-@router.get("/{formation_id}", response_model=FormationRead)
+@router.get("/{formation_id}", response_model=FormationResponse)
 def get_formation(formation_id: int, db: Session = Depends(get_db)):
     formation = formation_service.get_formation(db, formation_id)
     if not formation:
@@ -34,7 +34,7 @@ def get_formation(formation_id: int, db: Session = Depends(get_db)):
     return formation
 
 
-@router.put("/{formation_id}", response_model=FormationRead)
+@router.put("/{formation_id}", response_model=FormationResponse)
 def update_formation(formation_id: int, formation_data: FormationUpdate, db: Session = Depends(get_db)):
     formation = formation_service.update_formation(db, formation_id, formation_data)
     if not formation:

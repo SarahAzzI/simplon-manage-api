@@ -1,7 +1,7 @@
 from sqlalchemy import Column, Integer, String, DateTime, ForeignKey, Index
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
-from db.database import Base
+from app.db.database import Base
 from enum import Enum
 
 
@@ -52,7 +52,7 @@ class Inscription(Base):
 
     
     user = relationship("User", back_populates="inscriptions")
-    session = relationship("Session", back_populates="inscriptions")
+    session = relationship("SessionFormation", back_populates="inscriptions")
 
     __table_args__ = (
         Index("ix_inscriptions_user_session", "user_id", "session_id"),

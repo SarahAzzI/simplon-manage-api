@@ -2,12 +2,12 @@ import math
 from fastapi import APIRouter, Depends, Query, status
 from sqlalchemy.orm import Session
 
-from app.database import get_db
+from app.db.database import get_db
 from app.schemas.session import (
     SessionCreate,
     SessionUpdate,
-    SessionRead,
-    SessionDetailRead,
+    SessionResponse,
+    SessionDetailResponse,
 )
 from app.schemas.pagination import PaginatedResponse
 from app.services.session import SessionService
@@ -15,7 +15,7 @@ from app.services.session import SessionService
 router = APIRouter(prefix="/sessions", tags=["Sessions"])
 
 
-@router.get("/", response_model=PaginatedResponse[SessionRead])
+@router.get("/", response_model=PaginatedResponse[SessionResponse])
 def lister_sessions(
     page: int = Query(1, ge=1),
     size: int = Query(20, ge=1, le=100),
@@ -29,7 +29,7 @@ def lister_sessions(
 
     items = []
     for r in results:
-        s = SessionRead.model_validate(r["session"])
+        s = SessionResponse.model_validate(r["session"])
         s.nombre_inscrits = r["nombre_inscrits"]
         items.append(s)
 
@@ -42,21 +42,21 @@ def lister_sessions(
     )
 
 
-@router.get("/{session_id}", response_model=SessionDetailRead)
+@router.get("/{session_id}", response_model=SessionDetailResponse)
 def obtenir_session(session_id: int, db: Session = Depends(get_db)):
     session = SessionService.get_by_id(db, session_id)
     nb = SessionService.count_inscrits(db, session_id)
-    result = SessionDetailRead.model_validate(session)
+    result = SessionDetailResponse.model_validate(session)
     result.nombre_inscrits = nb
     return result
 
 
-@router.post("/", response_model=SessionRead, status_code=status.HTTP_201_CREATED)
+@router.post("/", response_model=SessionResponse, status_code=status.HTTP_201_CREATED)
 def creer_session(data: SessionCreate, db: Session = Depends(get_db)):
     return SessionService.create(db, data)
 
 
-@router.put("/{session_id}", response_model=SessionRead)
+@router.put("/{session_id}", response_model=SessionResponse)
 def modifier_session(
     session_id: int, data: SessionUpdate, db: Session = Depends(get_db)
 ):

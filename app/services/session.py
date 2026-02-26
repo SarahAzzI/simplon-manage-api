@@ -1,11 +1,12 @@
+from datetime import date
 from sqlalchemy.orm import Session, joinedload
 from sqlalchemy import select, func
 
 from app.models.session import SessionFormation
 from app.models.inscription import Inscription
-from app.models.user import User, RoleEnum  # ← user.py
+from app.models.user import User, Role  # ← user.py
 from app.schemas.session import SessionCreate, SessionUpdate
-from app.exceptions import NotFoundException, BadRequestException
+from app.core.exceptions import NotFoundException, BadRequestException
 
 
 class SessionService:
@@ -78,7 +79,8 @@ class SessionService:
             raise NotFoundException("Formateur", data.formateur_id)
 
         # Vérifier que c'est bien un formateur
-        if formateur.role != RoleEnum.FORMATEUR:
+        # Vérifier que c'est bien un formateur
+        if formateur.role != Role.TEACHER:
             raise BadRequestException(
                 f"L'utilisateur {data.formateur_id} n'a pas le rôle formateur"
             )
@@ -111,7 +113,7 @@ class SessionService:
             formateur = db.get(User, data.formateur_id)
             if not formateur:
                 raise NotFoundException("Formateur", data.formateur_id)
-            if formateur.role != RoleEnum.FORMATEUR:
+            if formateur.role != Role.TEACHER:
                 raise BadRequestException(
                     f"L'utilisateur {data.formateur_id} n'a pas le rôle formateur"
                 )

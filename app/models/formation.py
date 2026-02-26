@@ -1,7 +1,7 @@
 from sqlalchemy import Column, Integer, String, DateTime, Index
 from sqlalchemy.sql import func
 from sqlalchemy.orm import relationship
-from db.database import Base
+from app.db.database import Base
 from sqlalchemy import Enum as SAEnum
 from enum import Enum
 
@@ -33,7 +33,7 @@ class Formation(Base):
         nullable=False
     )
 
-    inscriptions = relationship("Inscription", back_populates="formation")
+    sessions = relationship("SessionFormation", back_populates="formation")
 
     __table_args__ = (
         Index("ix_formations_level", "level"),

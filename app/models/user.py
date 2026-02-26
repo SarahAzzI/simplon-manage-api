@@ -1,8 +1,9 @@
 from sqlalchemy import Column, Integer, String, DateTime, Boolean
-from db.database import Base
+from app.db.database import Base
 from sqlalchemy import Enum as SAEnum
 from enum import Enum
 from datetime import datetime, timezone
+from sqlalchemy.orm import relationship
 
 class Role(Enum):
     STUDENT = "Etudiant"
@@ -20,3 +21,6 @@ class User(Base):
     role = Column(SAEnum(Role), nullable=False)
     inscription_date = Column(DateTime, default=lambda: datetime.now(timezone.utc))
     is_active = Column(Boolean, default=True)  # True for actif, False for inactif. 
+
+    inscriptions = relationship("Inscription", back_populates="user", cascade="all, delete-orphan")
+    sessions_animees = relationship("SessionFormation", back_populates="formateur")
