@@ -182,3 +182,23 @@ def test_update_user_partial(client, db):
     assert response.json()["name"] == "NewName"
     assert response.json()["surname"] == original_surname  # Non modifié
 
+def test_create_user_duplicate_email(client, db):
+    """Email en double doit retourner 400"""
+    user_data = {
+        "email": "dup@test.com", "surname": "Dup", "name": "User", 
+        "birth_date": "1990-01-01T00:00:00", "role": "Etudiant"
+    }
+    # Créer le premier
+    client.post("/utilisateurs/", json=user_data)
+    
+    # Créer le deuxième avec le même email
+    response = client.post("/utilisateurs/", json=user_data)
+    assert response.status_code == 400
+    assert "existe déjà" in response.json()["detail"]
+
+def test_get_user_not_found(client, db):
+    """Utilisateur inexistant doit retourner 404"""
+    response = client.get("/utilisateurs/99999")
+    assert response.status_code == 404
+    assert response.json()["detail"] == "User not found"
+

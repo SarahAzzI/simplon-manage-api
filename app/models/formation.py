@@ -33,7 +33,7 @@ class Formation(Base):
         nullable=False
     )
 
-    sessions = relationship("SessionFormation", back_populates="formation")
+    sessions = relationship("SessionFormation", back_populates="formation", cascade="all, delete-orphan")
 
     __table_args__ = (
         Index("ix_formations_level", "level"),

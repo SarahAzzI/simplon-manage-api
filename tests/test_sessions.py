@@ -118,3 +118,33 @@ def test_delete_session(client, db):
     # Verify 404
     get_resp = client.get(f"/sessions/{sess_id}")
     assert get_resp.status_code == 404
+
+def test_create_session_invalid_capacity(client, db):
+    """Capacité < 1 doit retourner 400"""
+    form_resp = client.post("/formations/", json={
+        "title": "Cap Test", "description": "Description validation cap.", 
+        "duration": 5, "level": "débutant"
+    })
+    form_id = form_resp.json()["id"]
+    teach_resp = client.post("/utilisateurs/", json={
+        "email": "t_cap@test.com", "surname": "Te", "name": "Cap", 
+        "birth_date": "1980-01-01T00:00:00", "role": "Formateur"
+    })
+    teach_id = teach_resp.json()["id"]
+    
+    response = client.post("/sessions/", json={
+        "formation_id": form_id,
+        "formateur_id": teach_id,
+        "date_debut": date.today().isoformat(),
+        "date_fin": (date.today() + timedelta(days=1)).isoformat(),
+        "capacite_max": 0
+    })
+    # Schema validation might catch this if min_value is set, 
+    # but Service also has a safety check.
+    assert response.status_code in [400, 422]
+
+def test_get_session_not_found(client, db):
+    """Session inexistante doit retourner 404"""
+    response = client.get("/sessions/99999")
+    assert response.status_code == 404
+    assert "Session" in response.json()["detail"]
