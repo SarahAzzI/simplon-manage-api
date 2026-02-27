@@ -1,9 +1,10 @@
 from typing import Optional, List
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
-from fastapi import HTTPException, status
 from app.models.user import User
 from app.schemas.user import UserCreate, UserUpdate
+from app.core.exceptions import NotFoundException, BadRequestException
+
 
 
 class UserService:

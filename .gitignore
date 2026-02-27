@@ -23,3 +23,11 @@ alembic/versions/*.pyc
 # OS
 .DS_Store
 .venv
+
+# Database
+app.db
+*.db
+
+# Coverage
+.coverage
+htmlcov/
