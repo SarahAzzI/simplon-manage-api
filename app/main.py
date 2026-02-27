@@ -1,5 +1,6 @@
 
 from fastapi import FastAPI
+from app.db.database import engine, Base
 from app.routes import user, formation, session, inscription
 
 app = FastAPI(
@@ -7,6 +8,8 @@ app = FastAPI(
     description="API REST pour la gestion des formations, sessions et inscriptions",
     version="1.0.0",
 )
+
+Base.metadata.create_all(bind=engine) 
 
 # ENREGISTREMENT DES ROUTES (routers)
 # Chaque ligne connecte un fichier routes/*.py à l'API
