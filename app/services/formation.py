@@ -2,6 +2,7 @@ from typing import Optional, List
 from sqlalchemy.orm import Session
 from app.models.formation import Formation
 from app.schemas.formation import FormationCreate, FormationUpdate, FormationResponse
+from app.core.exceptions import NotFoundException
 
 
 class FormationService:
@@ -11,7 +12,7 @@ class FormationService:
             title=formation_data.title,
             description=formation_data.description,
             duration=formation_data.duration,
-            level=formation_data.level
+            level=formation_data.level,
         )
         db.add(new_formation)
         db.commit()
@@ -19,8 +20,11 @@ class FormationService:
         return new_formation
 
     @staticmethod
-    def get_by_id(db: Session, formation_id: int) -> Optional[Formation]:
-        return db.query(Formation).filter(Formation.id == formation_id).first()
+    def get_by_id(db: Session, formation_id: int) -> Formation:
+        formation = db.query(Formation).filter(Formation.id == formation_id).first()
+        if not formation:
+            raise NotFoundException("Formation", formation_id)
+        return formation
 
     @staticmethod
     def list(db: Session, skip: int = 0, limit: int = 100) -> List[Formation]:
@@ -31,25 +35,21 @@ class FormationService:
         return db.query(Formation).count()
 
     @staticmethod
-    def update(db: Session, formation_id: int, formation_data: FormationUpdate) -> Optional[Formation]:
+    def update(
+        db: Session, formation_id: int, formation_data: FormationUpdate
+    ) -> Formation:
         formation = FormationService.get_by_id(db, formation_id)
-        if not formation:
-            return None
-        
+
         update_data = formation_data.model_dump(exclude_unset=True)
         for key, value in update_data.items():
             setattr(formation, key, value)
-        
+
         db.commit()
         db.refresh(formation)
         return formation
 
     @staticmethod
-    def delete(db: Session, formation_id: int) -> bool:
+    def delete(db: Session, formation_id: int) -> None:
         formation = FormationService.get_by_id(db, formation_id)
-        if not formation:
-            return False
-        
         db.delete(formation)
         db.commit()
-        return True

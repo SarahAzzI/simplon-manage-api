@@ -1,45 +1,51 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+import math
+from fastapi import APIRouter, Depends, Query, status
 from sqlalchemy.orm import Session
 from app.db.database import get_db
 from app.schemas.user import UserCreate, UserResponse, UserUpdate, UserDelete
+from app.schemas.pagination import PaginatedResponse
 from app.services.user import UserService
 
-router = APIRouter(
-    prefix="/utilisateurs",
-    tags=["Utilisateurs"]
-)
+router = APIRouter(prefix="/utilisateurs", tags=["Utilisateurs"])
+
 
 @router.post("/", response_model=UserResponse, status_code=status.HTTP_201_CREATED)
 def create_user(user: UserCreate, db: Session = Depends(get_db)):
     return UserService.create(db, user)
 
+
 @router.get("/{user_id}", response_model=UserResponse)
 def read_user(user_id: int, db: Session = Depends(get_db)):
-    db_user = UserService.get_by_id(db, user_id)
-    if not db_user:
-        raise HTTPException(status_code=404, detail="User not found")
-    return db_user
+    return UserService.get_by_id(db, user_id)
 
-@router.get("/", response_model=list[UserResponse])
-def read_users(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
-    return UserService.list(db, skip, limit)  
+
+@router.get("/", response_model=PaginatedResponse[UserResponse])
+def read_users(
+    page: int = Query(1, ge=1),
+    size: int = Query(20, ge=1, le=100),
+    db: Session = Depends(get_db),
+):
+    skip = (page - 1) * size
+    items = UserService.list(db, skip=skip, limit=size)
+    total = UserService.get_total(db)
+    pages = math.ceil(total / size) if total else 0
+    return {"items": items, "total": total, "page": page, "size": size, "pages": pages}
+
 
 @router.patch("/{user_id}", response_model=UserResponse)
 def update_user(user_id: int, user: UserUpdate, db: Session = Depends(get_db)):
-    updated_user = UserService.update(db, user_id, user)
-    if not updated_user:
-        raise HTTPException(status_code=404, detail="User not found")
-    return updated_user
+    return UserService.update(db, user_id, user)
+
 
 @router.delete("/{user_id}", response_model=UserDelete)
 def delete_user(user_id: int, hard_delete: bool = False, db: Session = Depends(get_db)):
     if hard_delete:
-        success = UserService.hard_delete(db, user_id)
-        if not success:
-            raise HTTPException(status_code=404, detail="User not found")
-        return UserDelete(message="User hard deleted", user_id=user_id, delete_type="hard")
+        UserService.hard_delete(db, user_id)
+        return UserDelete(
+            message="User hard deleted", user_id=user_id, delete_type="hard"
+        )
     else:
-        deleted_user = UserService.soft_delete(db, user_id)
-        if not deleted_user:
-            raise HTTPException(status_code=404, detail="User not found")
-        return UserDelete(message="User soft deleted", user_id=user_id, delete_type="soft")
+        UserService.soft_delete(db, user_id)
+        return UserDelete(
+            message="User soft deleted", user_id=user_id, delete_type="soft"
+        )
