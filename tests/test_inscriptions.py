@@ -215,7 +215,7 @@ def test_delete_inscription(client, db):
 
     # Vérifier que c'est supprimé
     get_response = client.get(f"/inscriptions/session/{session.id}")
-    assert len(get_response.json()) == 0
+    assert len(get_response.json()["items"]) == 0
 
 
 def test_create_inscription_non_student(client, db):
@@ -297,8 +297,9 @@ def test_get_sessions_by_student(client, db):
     # Lister les sessions de l'apprenant
     response = client.get(f"/inscriptions/student/{apprenant.id}")
     assert response.status_code == 200
-    assert len(response.json()) == 1
-    assert response.json()[0]["session_id"] == session.id
+    data = response.json()
+    assert len(data["items"]) == 1
+    assert data["items"][0]["session_id"] == session.id
 
 
 def test_update_inscription_statut(client, db):
@@ -349,3 +350,62 @@ def test_update_inscription_statut(client, db):
     )
     assert patch_resp.status_code == 200
     assert patch_resp.json()["statut"] == "confirmé"
+
+
+def test_get_inscriptions_pagination(client, db):
+    """Tester la pagination des inscriptions."""
+    # Setup: 1 formation, 1 teacher, 1 session, 5 students
+    formation = Formation(
+        title="Paginated Inscriptions",
+        description="Desc",
+        duration=10,
+        level="débutant",
+    )
+    db.add(formation)
+    teacher = User(
+        email="t_pag@test.com",
+        surname="T",
+        name="Teacher",
+        birth_date=datetime(1980, 1, 1),
+        role=Role.TEACHER,
+    )
+    db.add(teacher)
+    db.commit()
+
+    session = SessionFormation(
+        formation_id=formation.id,
+        formateur_id=teacher.id,
+        date_debut=date.today(),
+        date_fin=date.today() + timedelta(days=5),
+        capacite_max=10,
+    )
+    db.add(session)
+
+    students = []
+    for i in range(5):
+        s = User(
+            email=f"s{i}@test.com",
+            surname=f"S{i}",
+            name="Student",
+            birth_date=datetime(2000, 1, 1),
+            role=Role.STUDENT,
+        )
+        students.append(s)
+        db.add(s)
+    db.commit()
+
+    for s in students:
+        client.post("/inscriptions/", json={"user_id": s.id, "session_id": session.id})
+
+    # Tester pagination par session
+    response = client.get(f"/inscriptions/session/{session.id}?page=1&size=2")
+    assert response.status_code == 200
+    data = response.json()
+    assert len(data["items"]) == 2
+    assert data["total"] == 5
+    assert data["pages"] == 3
+
+    response = client.get(f"/inscriptions/session/{session.id}?page=3&size=2")
+    assert response.status_code == 200
+    data = response.json()
+    assert len(data["items"]) == 1
