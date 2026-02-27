@@ -5,6 +5,9 @@ from app.schemas.user import UserResponse
 from app.schemas.formation import FormationResponse
 
 
+from app.models.session import SessionStatus
+
+
 # ── BASE ──
 class SessionBase(BaseModel):
     formation_id: int
@@ -12,6 +15,7 @@ class SessionBase(BaseModel):
     date_debut: date
     date_fin: date
     capacite_max: int
+    statut: SessionStatus = SessionStatus.PLANIFIEE
 
 
 # ── CRÉATION ──
@@ -31,6 +35,7 @@ class SessionUpdate(BaseModel):
     date_debut: Optional[date] = None
     date_fin: Optional[date] = None
     capacite_max: Optional[int] = None
+    statut: Optional[SessionStatus] = None
 
     @field_validator("capacite_max")
     @classmethod
