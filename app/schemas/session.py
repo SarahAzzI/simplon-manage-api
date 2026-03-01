@@ -53,9 +53,10 @@ class SessionResponse(SessionBase):
     nombre_inscrits: int = 0
     created_at: datetime
     updated_at: datetime
+    formation: Optional[FormationResponse] = None
+    formateur: Optional[UserResponse] = None
 
 
 # ── LECTURE DÉTAILLÉE ──
 class SessionDetailResponse(SessionResponse):
-    formation: FormationResponse
-    formateur: UserResponse
+    pass

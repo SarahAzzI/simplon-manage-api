@@ -11,16 +11,11 @@ import {
     Cell
 } from "recharts";
 
-const data = [
-    { name: "Jan", total: 45 },
-    { name: "Feb", total: 52 },
-    { name: "Mar", total: 48 },
-    { name: "Apr", total: 61 },
-    { name: "May", total: 55 },
-    { name: "Jun", total: 67 },
-];
+interface StatsChartProps {
+    data: { name: string; total: number }[];
+}
 
-export function StatsChart() {
+export function StatsChart({ data }: StatsChartProps) {
     return (
         <div className="h-[240px] w-full">
             <ResponsiveContainer width="100%" height="100%">
@@ -52,7 +47,7 @@ export function StatsChart() {
                         barSize={32}
                     >
                         {data.map((entry, index) => (
-                            <Cell key={`cell-${index}`} fill={index === 5 ? '#2563eb' : '#93c5fd'} />
+                            <Cell key={`cell-${index}`} fill={index === data.length - 1 ? '#CE0033' : '#fecaca'} />
                         ))}
                     </Bar>
                 </BarChart>
