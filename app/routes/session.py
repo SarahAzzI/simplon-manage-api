@@ -24,9 +24,7 @@ def lister_sessions(
     formateur_id: Optional[int] = Query(None),
     db: Session = Depends(get_db),
 ):
-    results, total = SessionService.list(
-        db, page, size, formation_id, formateur_id
-    )
+    results, total = SessionService.list(db, page, size, formation_id, formateur_id)
 
     items = []
     for r in results:
@@ -67,3 +65,6 @@ def modifier_session(
 @router.delete("/{session_id}", status_code=status.HTTP_204_NO_CONTENT)
 def supprimer_session(session_id: int, db: Session = Depends(get_db)):
     SessionService.delete(db, session_id)
+
+
+# souhaib  gainsbourg
