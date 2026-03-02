@@ -1,5 +1,5 @@
 from pydantic import BaseModel, EmailStr, Field, ConfigDict
-from datetime import datetime
+from datetime import date
 from typing import Optional
 from app.models.user import Role
 
@@ -9,7 +9,7 @@ class UserBase(BaseModel):
     email: EmailStr
     surname: str = Field(min_length=2, max_length=100)
     name: str = Field(min_length=2, max_length=100)
-    birth_date: datetime
+    birth_date: date
     role: Role
 
 
@@ -20,19 +20,18 @@ class UserCreate(UserBase):
 
 class UserResponse(UserBase):
     id: int
-    inscription_date: datetime
+    inscription_date: date
     is_active: bool
 
     model_config = ConfigDict(from_attributes=True)
 
 
 class UserUpdate(BaseModel):
-    email: Optional[EmailStr] = None
+    
     surname: Optional[str] = Field(default=None, min_length=2, max_length=100)
     name: Optional[str] = Field(default=None, min_length=2, max_length=100)
-    birth_date: Optional[datetime] = None
     role: Optional[Role] = None
-    is_active: Optional[bool] = None
+    
 
 
 class UserDelete(BaseModel):
