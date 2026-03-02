@@ -5,6 +5,7 @@ from sqlalchemy.exc import IntegrityError
 from app.models.user import User
 from app.schemas.user import UserCreate, UserUpdate
 from app.core.exceptions import NotFoundException, BadRequestException
+from sqlalchemy import func
 
 
 class UserService:
@@ -68,7 +69,6 @@ class UserService:
 
     @staticmethod
     def update(db: Session, user_id: int, user_data: UserUpdate) -> User:
-        """Met à jour un user"""
         user = db.query(User).filter(User.id == user_id).first()
         if not user:
             raise HTTPException(
@@ -76,21 +76,36 @@ class UserService:
                 detail=f"Utilisateur avec l'id {user_id} non trouvé",
             )
 
-        update_data = user_data.model_dump(exclude_unset=True)
+        update_data = user_data.model_dump(exclude_unset=True, exclude_none=True)
 
-        # Si on modifie l'email, vérifier qu'il n'existe pas déjà
+        # Gestion de l'email
         if "email" in update_data:
-            existing = UserService.get_by_email(db, update_data["email"])
-            if existing and existing.id != user_id:
-                raise HTTPException(
-                    status_code=status.HTTP_400_BAD_REQUEST,
-                    detail=f"L'email {update_data['email']} est déjà utilisé",
-                )
+            new_email = str(update_data["email"]).strip().lower()
+            current_email = (user.email or "").strip().lower()
 
+            if new_email == current_email:
+                # Email inchangé → on ignore
+                del update_data["email"]
+            else:
+                # Vérifie uniquement s'il est pris par un AUTRE utilisateur
+                existing = (
+                    db.query(User).filter(func.lower(User.email) == new_email).first()
+                )
+                if existing is not None and existing.id != user_id:
+                    raise HTTPException(
+                        status_code=status.HTTP_409_CONFLICT,
+                        detail="L'email est déjà utilisé",
+                    )
+
+        # Appliquer les autres champs
         for key, value in update_data.items():
             setattr(user, key, value)
 
-        db.commit()
+        try:
+            db.commit()
+        except IntegrityError:
+            db.rollback()
+            raise HTTPException(status_code=409, detail="Erreur base de données")
         db.refresh(user)
         return user
 
