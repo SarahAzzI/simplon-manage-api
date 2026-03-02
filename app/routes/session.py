@@ -65,6 +65,3 @@ def modifier_session(
 @router.delete("/{session_id}", status_code=status.HTTP_204_NO_CONTENT)
 def supprimer_session(session_id: int, db: Session = Depends(get_db)):
     SessionService.delete(db, session_id)
-
-
-# souhaib  gainsbourg
