@@ -10,7 +10,7 @@ router = APIRouter(prefix="/formations", tags=["Formations"])
 
 
 @router.post("/", response_model=FormationResponse, status_code=status.HTTP_201_CREATED)
-def create_formation_route(formation: FormationCreate, db: Session = Depends(get_db)):
+def create_formation(formation: FormationCreate, db: Session = Depends(get_db)):
     return FormationService.create(db, formation)
 
 
@@ -32,7 +32,7 @@ def get_formation_route(formation_id: int, db: Session = Depends(get_db)):
     return FormationService.get_by_id(db, formation_id)
 
 
-@router.put("/{formation_id}", response_model=FormationResponse)
+@router.patch("/{formation_id}", response_model=FormationResponse)
 def update_formation_route(
     formation_id: int, formation: FormationUpdate, db: Session = Depends(get_db)
 ):
