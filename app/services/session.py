@@ -5,7 +5,7 @@ from sqlalchemy import select, func
 
 from app.models.session import SessionFormation
 from app.models.inscription import Inscription
-from app.models.user import User, Role  # ← user.py
+from app.core.role import  Role  
 from app.schemas.session import SessionCreate, SessionUpdate
 from app.core.exceptions import NotFoundException, BadRequestException
 

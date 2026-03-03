@@ -2,7 +2,7 @@ from sqlalchemy.orm import Session, joinedload
 from sqlalchemy import select, func
 from app.models.inscription import Inscription, StatutInscription
 from app.models.session import SessionFormation
-from app.models.user import User, Role
+from app.core.role import  Role
 from app.schemas.inscription import InscriptionCreate, InscriptionUpdate
 from app.core.exceptions import NotFoundException, BadRequestException
 
