@@ -21,6 +21,11 @@ class FormationService:
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail=f"Une formation avec le titre {formation_data.title} existe déjà"
             )
+        if not formation_data.level:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Le niveau doit être spécifié"
+            )
         try:
             new_formation = Formation(
             title=formation_data.title,
@@ -66,6 +71,12 @@ class FormationService:
             raise Exception(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail=f"La formation avec l'id {formation_id} non trouvé"
+            )
+        
+        if not formation_data.level:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Le niveau doit être spécifié"
             )
         
         try:
