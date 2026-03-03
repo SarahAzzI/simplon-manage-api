@@ -1,5 +1,5 @@
 from datetime import date, timedelta
-
+from app.core.role import Role
 
 def test_create_session(client, db):
     # 1. Create a formation
