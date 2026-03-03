@@ -16,6 +16,7 @@ class SessionBase(BaseModel):
     date_fin: date
     capacite_max: int
     statut: SessionStatus = SessionStatus.PLANIFIEE
+    co_formateur_id: Optional[int] = None
 
 
 # ── CRÉATION ──
@@ -36,6 +37,7 @@ class SessionUpdate(BaseModel):
     date_fin: Optional[date] = None
     capacite_max: Optional[int] = None
     statut: Optional[SessionStatus] = None
+    co_formateur_id: Optional[int] = None
 
     @field_validator("capacite_max")
     @classmethod
@@ -55,6 +57,7 @@ class SessionResponse(SessionBase):
     updated_at: datetime
     formation: Optional[FormationResponse] = None
     formateur: Optional[UserResponse] = None
+    co_formateur: Optional[UserResponse] = None
 
 
 # ── LECTURE DÉTAILLÉE ──

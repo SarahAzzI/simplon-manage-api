@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
 from app.models.user import User
 from app.schemas.user import UserCreate, UserUpdate
-from app.core.exceptions import NotFoundException, BadRequestException
+from app.core.exceptions import BadRequestException
 from sqlalchemy import func
 
 
@@ -58,9 +58,14 @@ class UserService:
         return user
 
     @staticmethod
-    def list(db: Session, skip: int = 0, limit: int = 100) -> List[User]:
+    def list(
+        db: Session, skip: int = 0, limit: int = 100, only_active: bool = False
+    ) -> List[User]:
         """Liste tous les users avec pagination"""
-        return db.query(User).offset(skip).limit(limit).all()
+        query = db.query(User)
+        if only_active:
+            query = query.filter(User.is_active == True)
+        return query.offset(skip).limit(limit).all()
 
     @staticmethod
     def get_total(db: Session) -> int:

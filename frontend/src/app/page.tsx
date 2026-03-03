@@ -79,7 +79,7 @@ export default function DashboardPage() {
     setError(null);
     try {
       const [usersRes, formationsRes, sessionsRes] = await Promise.all([
-        fetchUsers(1, 100),
+        fetchUsers(1, 100, true),
         fetchFormations(1, 100),
         fetchSessions(1, 100),
       ]);

@@ -23,10 +23,11 @@ def read_user(user_id: int, db: Session = Depends(get_db)):
 def read_users(
     page: int = Query(1, ge=1),
     size: int = Query(20, ge=1, le=100),
+    active_only: bool = Query(False),
     db: Session = Depends(get_db),
 ):
     skip = (page - 1) * size
-    items = UserService.list(db, skip=skip, limit=size)
+    items = UserService.list(db, skip=skip, limit=size, only_active=active_only)
     total = UserService.get_total(db)
     pages = math.ceil(total / size) if total else 0
     return {"items": items, "total": total, "page": page, "size": size, "pages": pages}

@@ -1,18 +1,24 @@
 from datetime import date, datetime
-from sqlalchemy import Integer, Date, ForeignKey, CheckConstraint, DateTime
+from typing import Optional
+from sqlalchemy import (
+    Integer,
+    Date,
+    ForeignKey,
+    CheckConstraint,
+    DateTime,
+    Enum as SAEnum,
+)
 from sqlalchemy.sql import func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.db.database import Base
-
-
 from enum import Enum as PyEnum
 
 
 class SessionStatus(PyEnum):
-    PLANIFIEE = "planifiée"
-    EN_COURS = "en_cours"
-    TERMINEE = "terminée"
-    ANNULEE = "annulée"
+    PLANIFIEE = "PLANIFIEE"
+    EN_COURS = "EN_COURS"
+    TERMINEE = "TERMINEE"
+    ANNULEE = "ANNULEE"
 
 
 class SessionFormation(Base):
@@ -24,14 +30,20 @@ class SessionFormation(Base):
         nullable=False,
     )
     formateur_id: Mapped[int] = mapped_column(
-        ForeignKey("users.id", ondelete="CASCADE"),  # ← corrigé
+        ForeignKey("users.id", ondelete="CASCADE"),
         nullable=False,
     )
     date_debut: Mapped[date] = mapped_column(Date, nullable=False)
     date_fin: Mapped[date] = mapped_column(Date, nullable=False)
     capacite_max: Mapped[int] = mapped_column(Integer, nullable=False)
     statut: Mapped[SessionStatus] = mapped_column(
-        nullable=False, default=SessionStatus.PLANIFIEE
+        SAEnum(SessionStatus, values_callable=lambda x: [e.value for e in x]),
+        nullable=False,
+        default=SessionStatus.PLANIFIEE,
+    )
+    co_formateur_id: Mapped[Optional[int]] = mapped_column(
+        ForeignKey("users.id", ondelete="CASCADE"),
+        nullable=True,
     )
 
     created_at: Mapped[datetime] = mapped_column(
@@ -48,7 +60,10 @@ class SessionFormation(Base):
 
     # Relations
     formation = relationship("Formation", back_populates="sessions")
-    formateur = relationship("User", back_populates="sessions_animees")
+    formateur = relationship(
+        "User", foreign_keys=[formateur_id], back_populates="sessions_animees"
+    )
+    co_formateur = relationship("User", foreign_keys=[co_formateur_id])
     inscriptions = relationship(
         "Inscription",
         back_populates="session",

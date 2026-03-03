@@ -36,13 +36,13 @@ def test_create_session(client, db):
             "formateur_id": teach_id,
             "date_debut": today.isoformat(),
             "date_fin": (today + timedelta(days=5)).isoformat(),
-            "capacite_max": 15,
+            "capacite_max": 13,
         },
     )
     assert response.status_code == 201
     data = response.json()
     assert data["formation_id"] == form_id
-    assert data["capacite_max"] == 15
+    assert data["capacite_max"] == 13
     assert "id" in data
 
 
@@ -82,20 +82,20 @@ def test_update_session(client, db):
         json={
             "formation_id": form_id,
             "formateur_id": teach_id,
-            "date_debut": date.today().isoformat(),
-            "date_fin": (date.today() + timedelta(days=2)).isoformat(),
-            "capacite_max": 10,
+            "date_debut": "2025-01-01",
+            "date_fin": "2025-01-10",
+            "capacite_max": 13,
         },
     )
     sess_id = sess_resp.json()["id"]
 
     # Update capacity and dates
-    new_fin = (date.today() + timedelta(days=10)).isoformat()
+    new_fin = "2025-01-20"
     response = client.put(
-        f"/sessions/{sess_id}", json={"capacite_max": 20, "date_fin": new_fin}
+        f"/sessions/{sess_id}", json={"capacite_max": 13, "date_fin": new_fin}
     )
     assert response.status_code == 200
-    assert response.json()["capacite_max"] == 20
+    assert response.json()["capacite_max"] == 13
     assert response.json()["date_fin"] == new_fin
 
 
@@ -130,7 +130,7 @@ def test_create_session_invalid_dates(client, db):
             "formateur_id": teach_id,
             "date_debut": (date.today() + timedelta(days=10)).isoformat(),
             "date_fin": date.today().isoformat(),
-            "capacite_max": 10,
+            "capacite_max": 13,
         },
     )
     # Should trigger BadRequestException (400) or validation error (422) depending on implementation
@@ -169,7 +169,7 @@ def test_delete_session(client, db):
             "formateur_id": teach_id,
             "date_debut": date.today().isoformat(),
             "date_fin": (date.today() + timedelta(days=1)).isoformat(),
-            "capacite_max": 5,
+            "capacite_max": 13,
         },
     )
     sess_id = sess_resp.json()["id"]
@@ -213,12 +213,11 @@ def test_create_session_invalid_capacity(client, db):
             "formateur_id": teach_id,
             "date_debut": date.today().isoformat(),
             "date_fin": (date.today() + timedelta(days=1)).isoformat(),
-            "capacite_max": 0,
+            "capacite_max": 20,
         },
     )
-    # Schema validation might catch this if min_value is set,
-    # but Service also has a safety check.
-    assert response.status_code in [400, 422]
+    assert response.status_code == 400
+    assert "doit être exactement de 13" in response.json()["detail"]
 
 
 def test_get_session_not_found(client, db):
@@ -248,7 +247,7 @@ def test_create_session_non_existent_teacher(client, db):
             "formateur_id": 99999,
             "date_debut": date.today().isoformat(),
             "date_fin": (date.today() + timedelta(days=1)).isoformat(),
-            "capacite_max": 10,
+            "capacite_max": 13,
         },
     )
     assert response.status_code == 404
@@ -276,7 +275,7 @@ def test_create_session_non_existent_formation(client, db):
             "formateur_id": teach_id,
             "date_debut": date.today().isoformat(),
             "date_fin": (date.today() + timedelta(days=1)).isoformat(),
-            "capacite_max": 10,
+            "capacite_max": 13,
         },
     )
     assert response.status_code == 404
@@ -314,7 +313,7 @@ def test_create_session_with_non_teacher_role(client, db):
             "formateur_id": student_id,
             "date_debut": date.today().isoformat(),
             "date_fin": (date.today() + timedelta(days=1)).isoformat(),
-            "capacite_max": 10,
+            "capacite_max": 13,
         },
     )
     assert response.status_code == 400
@@ -371,7 +370,7 @@ def test_list_sessions_filters(client, db):
             "formateur_id": t1,
             "date_debut": "2025-01-01",
             "date_fin": "2025-01-10",
-            "capacite_max": 10,
+            "capacite_max": 13,
         },
     )
     client.post(
@@ -381,7 +380,7 @@ def test_list_sessions_filters(client, db):
             "formateur_id": t2,
             "date_debut": "2025-02-01",
             "date_fin": "2025-02-10",
-            "capacite_max": 10,
+            "capacite_max": 13,
         },
     )
     client.post(
@@ -391,7 +390,7 @@ def test_list_sessions_filters(client, db):
             "formateur_id": t2,
             "date_debut": "2025-03-01",
             "date_fin": "2025-03-10",
-            "capacite_max": 10,
+            "capacite_max": 13,
         },
     )
 
@@ -434,7 +433,7 @@ def test_update_session_invalid_role(client, db):
             "formateur_id": t_id,
             "date_debut": "2025-01-01",
             "date_fin": "2025-01-10",
-            "capacite_max": 10,
+            "capacite_max": 13,
         },
     ).json()["id"]
 
@@ -482,7 +481,7 @@ def test_update_session_invalid_formation(client, db):
             "formateur_id": t_id,
             "date_debut": "2025-01-01",
             "date_fin": "2025-01-10",
-            "capacite_max": 10,
+            "capacite_max": 13,
         },
     ).json()["id"]
 
@@ -518,7 +517,7 @@ def test_update_session_invalid_capacity_reduction(client, db):
             "formateur_id": t_id,
             "date_debut": "2025-01-01",
             "date_fin": "2025-01-10",
-            "capacite_max": 10,
+            "capacite_max": 13,
         },
     ).json()["id"]
 
@@ -535,9 +534,10 @@ def test_update_session_invalid_capacity_reduction(client, db):
         ).json()["id"]
         client.post("/inscriptions/", json={"session_id": s_id, "user_id": st_id})
 
-    resp = client.put(f"/sessions/{s_id}", json={"capacite_max": 4})
+    # On tente de mettre autre chose que 13 (échec attendu)
+    resp = client.put(f"/sessions/{s_id}", json={"capacite_max": 20})
     assert resp.status_code == 400
-    assert "Impossible de réduire la capacité" in resp.json()["detail"]
+    assert "doit être exactement de 13" in resp.json()["detail"]
 
 
 def test_session_statut_flow(client, db):
@@ -569,17 +569,88 @@ def test_session_statut_flow(client, db):
             "formateur_id": t_id,
             "date_debut": "2025-01-01",
             "date_fin": "2025-01-10",
-            "capacite_max": 10,
+            "capacite_max": 13,
         },
     )
     s_id = resp.json()["id"]
     assert resp.json()["statut"] == "planifiée"
 
+    # Créer un co-formateur (car requis pour passer en cours)
+    co_id = client.post(
+        "/utilisateurs/",
+        json={
+            "email": "co_stat@s.com",
+            "surname": "CoTeacher",
+            "name": "Name",
+            "birth_date": "1980-01-01T00:00:00",
+            "role": "Formateur",
+        },
+    ).json()["id"]
+
+    # Inscrire 13 étudiants (doit être plein pour passer en cours)
+    for i in range(13):
+        st_id = client.post(
+            "/utilisateurs/",
+            json={
+                "email": f"st_flow_{i}@s.com",
+                "surname": "Student",
+                "name": f"Name{i}",
+                "birth_date": "2000-01-01T00:00:00",
+                "role": "Etudiant",
+            },
+        ).json()["id"]
+        client.post("/inscriptions/", json={"session_id": s_id, "user_id": st_id})
+
+    # Ajouter le co-formateur à la session
+    client.put(f"/sessions/{s_id}", json={"co_formateur_id": co_id})
+
+    # Maintenant on peut passer en cours
     resp = client.put(f"/sessions/{s_id}", json={"statut": "en_cours"})
+    assert resp.status_code == 200
     assert resp.json()["statut"] == "en_cours"
 
     resp = client.put(f"/sessions/{s_id}", json={"statut": "terminée"})
     assert resp.json()["statut"] == "terminée"
+
+
+def test_session_en_cours_requires_student(client, db):
+    """Vérifier qu'une session ne peut pas passer 'En cours' sans étudiants"""
+    f_id = client.post(
+        "/formations/",
+        json={
+            "title": "Formation Empty",
+            "description": "Description correcte de plus de vingt caractères.",
+            "duration": 10,
+            "level": "débutant",
+        },
+    ).json()["id"]
+    t_id = client.post(
+        "/utilisateurs/",
+        json={
+            "email": "t_empty@s.com",
+            "surname": "Teacher",
+            "name": "Name",
+            "birth_date": "1980-01-01T00:00:00",
+            "role": "Formateur",
+        },
+    ).json()["id"]
+
+    resp = client.post(
+        "/sessions/",
+        json={
+            "formation_id": f_id,
+            "formateur_id": t_id,
+            "date_debut": "2025-01-01",
+            "date_fin": "2025-01-10",
+            "capacite_max": 13,
+        },
+    )
+    s_id = resp.json()["id"]
+
+    # Tentative de passage "en cours" (devrait échouer car < 13 inscrits)
+    resp = client.put(f"/sessions/{s_id}", json={"statut": "en_cours"})
+    assert resp.status_code == 400
+    assert "pas complète (13/13)" in resp.json()["detail"]
 
 
 def test_get_session_detail(client, db):
@@ -610,7 +681,7 @@ def test_get_session_detail(client, db):
             "formateur_id": t_id,
             "date_debut": "2025-01-01",
             "date_fin": "2025-01-10",
-            "capacite_max": 10,
+            "capacite_max": 13,
         },
     ).json()["id"]
 
@@ -663,7 +734,7 @@ def test_update_session_non_existent_teacher(client, db):
             "formateur_id": t_id,
             "date_debut": "2025-01-01",
             "date_fin": "2025-01-10",
-            "capacite_max": 10,
+            "capacite_max": 13,
         },
     ).json()["id"]
 
@@ -693,8 +764,7 @@ def test_create_session_zero_capacity(client, db):
         },
     ).json()["id"]
 
-    # On utilise 0. Le schéma Pydantic Field(gt=0) pourrait déjà le bloquer (422),
-    # mais le service a une vérification interne aussi.
+    # On utilise 20. Doit retourner 400 car capacite_max != 13
     resp = client.post(
         "/sessions/",
         json={
@@ -702,7 +772,8 @@ def test_create_session_zero_capacity(client, db):
             "formateur_id": t_id,
             "date_debut": "2025-01-01",
             "date_fin": "2025-01-10",
-            "capacite_max": 0,
+            "capacite_max": 20,
         },
     )
-    assert resp.status_code in [400, 422]
+    assert resp.status_code == 400
+    assert "doit être exactement de 13" in resp.json()["detail"]

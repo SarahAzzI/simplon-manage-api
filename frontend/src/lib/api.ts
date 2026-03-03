@@ -1,6 +1,6 @@
 const API_BASE_URL = typeof window !== 'undefined' 
-  ? (process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000")
-  : "http://localhost:8000";
+  ? (process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000")
+  : "http://127.0.0.1:8000";
 
 console.log("Connecting to API at:", API_BASE_URL);
 
@@ -88,8 +88,8 @@ export const deleteFormation = (id: number): Promise<void> =>
   fetch(`${API_BASE_URL}/formations/${id}`, { method: "DELETE" }).then(res => handleResponse<void>(res));
 
 // Users (prefix /utilisateurs)
-export const fetchUsers = (page = 1, size = 10): Promise<PaginatedResponse<User>> =>
-  fetch(`${API_BASE_URL}/utilisateurs/?page=${page}&size=${size}`).then(res => handleResponse<PaginatedResponse<User>>(res));
+export const fetchUsers = (page = 1, size = 10, activeOnly = false): Promise<PaginatedResponse<User>> =>
+  fetch(`${API_BASE_URL}/utilisateurs/?page=${page}&size=${size}&active_only=${activeOnly}`).then(res => handleResponse<PaginatedResponse<User>>(res));
 
 export const createUser = (data: Partial<User>): Promise<User> =>
   fetch(`${API_BASE_URL}/utilisateurs/`, {

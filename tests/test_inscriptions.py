@@ -9,7 +9,7 @@ def test_create_inscription(client, db):
     # 1. Créer une formation
     formation = Formation(
         title="Python Expert",
-        description="Advanced Python",
+        description="Une description complète et détaillée de la formation Python Expert.",
         duration=35,
         level="avancé",
     )
@@ -43,7 +43,7 @@ def test_create_inscription(client, db):
         formateur_id=formateur.id,
         date_debut=date.today(),
         date_fin=date.today() + timedelta(days=5),
-        capacite_max=10,
+        capacite_max=13,
     )
     db.add(session)
     db.commit()
@@ -64,7 +64,7 @@ def test_create_inscription_already_registered(client, db):
     # Setup similar to above
     formation = Formation(
         title="Python Expert",
-        description="Advanced Python",
+        description="Une description complète et détaillée de la formation Python Expert.",
         duration=35,
         level="avancé",
     )
@@ -91,7 +91,7 @@ def test_create_inscription_already_registered(client, db):
         formateur_id=formateur.id,
         date_debut=date.today(),
         date_fin=date.today() + timedelta(days=5),
-        capacite_max=10,
+        capacite_max=13,
     )
     db.add(session)
     db.commit()
@@ -113,7 +113,7 @@ def test_create_inscription_already_registered(client, db):
 def test_create_inscription_session_full(client, db):
     formation = Formation(
         title="Python Expert",
-        description="Advanced Python",
+        description="Une description complète et détaillée de la formation Python Expert.",
         duration=35,
         level="avancé",
     )
@@ -126,52 +126,53 @@ def test_create_inscription_session_full(client, db):
         role=Role.TEACHER,
     )
     db.add(formateur)
-    apprenant1 = User(
-        email="student3@test.com",
-        surname="Smith",
-        name="Jane",
-        birth_date=datetime(2000, 1, 1),
-        role=Role.STUDENT,
-    )
-    apprenant2 = User(
-        email="student4@test.com",
-        surname="Doe",
-        name="John",
-        birth_date=datetime(1995, 1, 1),
-        role=Role.STUDENT,
-    )
-    db.add_all([apprenant1, apprenant2])
     db.commit()
 
-    # Session avec capacité 1
+    # Session avec capacité 13 (obligatoire désormais)
     session = SessionFormation(
         formation_id=formation.id,
         formateur_id=formateur.id,
         date_debut=date.today(),
         date_fin=date.today() + timedelta(days=5),
-        capacite_max=1,
+        capacite_max=13,
     )
     db.add(session)
     db.commit()
 
-    # Première inscription OK
-    client.post(
-        "/inscriptions/", json={"user_id": apprenant1.id, "session_id": session.id}
-    )
+    # Inscrire 13 étudiants
+    for i in range(13):
+        u = User(
+            email=f"full_{i}@test.com",
+            surname="Student",
+            name=f"S{i}",
+            birth_date=datetime(2000, 1, 1),
+            role=Role.STUDENT,
+        )
+        db.add(u)
+        db.commit()
+        client.post("/inscriptions/", json={"session_id": session.id, "user_id": u.id})
 
-    # Deuxième inscription KO (session complète)
-    response = client.post(
-        "/inscriptions/", json={"user_id": apprenant2.id, "session_id": session.id}
+    # 14ème inscription (doit échouer)
+    u_extra = User(
+        email="extra@test.com",
+        surname="Extra",
+        name="Student",
+        birth_date=datetime(2000, 1, 1),
+        role=Role.STUDENT,
     )
-
-    assert response.status_code == 400
-    assert "complète" in response.json()["detail"]
+    db.add(u_extra)
+    db.commit()
+    resp = client.post(
+        "/inscriptions/", json={"session_id": session.id, "user_id": u_extra.id}
+    )
+    assert resp.status_code == 400
+    assert "complète" in resp.json()["detail"].lower()
 
 
 def test_delete_inscription(client, db):
     formation = Formation(
         title="Python Expert",
-        description="Advanced Python",
+        description="Une description complète et détaillée de la formation Python Expert.",
         duration=35,
         level="avancé",
     )
@@ -198,7 +199,7 @@ def test_delete_inscription(client, db):
         formateur_id=formateur.id,
         date_debut=date.today(),
         date_fin=date.today() + timedelta(days=5),
-        capacite_max=10,
+        capacite_max=13,
     )
     db.add(session)
     db.commit()
@@ -222,7 +223,7 @@ def test_create_inscription_non_student(client, db):
     """Un formateur ou admin ne peut pas s'inscrire comme apprenant"""
     formation = Formation(
         title="Python Expert",
-        description="Advanced Python",
+        description="Une description complète et détaillée de la formation Python Expert.",
         duration=35,
         level="avancé",
     )
@@ -241,7 +242,7 @@ def test_create_inscription_non_student(client, db):
         formateur_id=formateur.id,
         date_debut=date.today(),
         date_fin=date.today() + timedelta(days=5),
-        capacite_max=10,
+        capacite_max=13,
     )
     db.add(session)
     db.commit()
@@ -258,7 +259,7 @@ def test_get_sessions_by_student(client, db):
     """Lister les sessions d'un apprenant"""
     formation = Formation(
         title="Python Expert",
-        description="Advanced Python",
+        description="Une description complète et détaillée de la formation Python Expert.",
         duration=35,
         level="avancé",
     )
@@ -284,7 +285,7 @@ def test_get_sessions_by_student(client, db):
         formateur_id=formateur.id,
         date_debut=date.today(),
         date_fin=date.today() + timedelta(days=5),
-        capacite_max=10,
+        capacite_max=13,
     )
     db.add(session)
     db.commit()
@@ -306,7 +307,7 @@ def test_update_inscription_statut(client, db):
     """Mettre à jour le statut d'une inscription"""
     formation = Formation(
         title="Python Expert",
-        description="Advanced Python",
+        description="Une description complète et détaillée de la formation Python Expert.",
         duration=35,
         level="avancé",
     )
@@ -332,7 +333,7 @@ def test_update_inscription_statut(client, db):
         formateur_id=formateur.id,
         date_debut=date.today(),
         date_fin=date.today() + timedelta(days=5),
-        capacite_max=10,
+        capacite_max=13,
     )
     db.add(session)
     db.commit()
@@ -357,14 +358,14 @@ def test_get_inscriptions_pagination(client, db):
     # Setup: 1 formation, 1 teacher, 1 session, 5 students
     formation = Formation(
         title="Paginated Inscriptions",
-        description="Desc",
+        description="Cette description fait plus de vingt caractères pour passer la validation.",
         duration=10,
         level="débutant",
     )
     db.add(formation)
     teacher = User(
         email="t_pag@test.com",
-        surname="T",
+        surname="TeacherSurname",
         name="Teacher",
         birth_date=datetime(1980, 1, 1),
         role=Role.TEACHER,
@@ -377,7 +378,7 @@ def test_get_inscriptions_pagination(client, db):
         formateur_id=teacher.id,
         date_debut=date.today(),
         date_fin=date.today() + timedelta(days=5),
-        capacite_max=10,
+        capacite_max=13,
     )
     db.add(session)
 
