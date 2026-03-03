@@ -1,7 +1,7 @@
 from fastapi import HTTPException, status
 from typing import Optional, List
 from sqlalchemy.orm import Session
-from sqlalchemy.exc import IntegrityError
+from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 from app.models.formation import Formation
 from app.schemas.formation import FormationCreate, FormationUpdate, FormationResponse
 from app.core.exceptions import NotFoundException
@@ -74,9 +74,10 @@ class FormationService:
                     status_code=status.HTTP_400_BAD_REQUEST,
                     detail="La durée de la formation doit être supérieure à 0"
                 )
+            
+            existing_formation = db.query(Formation).filter(Formation.title == formation_data.title).first()
         
-            if formation_data.title and formation_data.title != formation.title:
-                existing_formation = db.query(Formation).filter(Formation.title == formation_data.title).first()
+            if existing_formation:
                 if existing_formation:
                     raise HTTPException(
                         status_code=status.HTTP_400_BAD_REQUEST,
@@ -101,6 +102,20 @@ class FormationService:
         
     @staticmethod
     def delete(db: Session, formation_id: int) -> None:
+
         formation = FormationService.get_by_id(db, formation_id)
-        db.delete(formation)
-        db.commit()
+        if formation is None:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"La formation avec l'id {formation_id} n'existe pas."
+            )
+        try:
+
+            db.delete(formation)
+            db.commit()
+        except SQLAlchemyError as e:
+            db.rollback()
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail=f"Une erreur inattendue est survenue : {str(e)}"
+            )
