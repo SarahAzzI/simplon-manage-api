@@ -1,9 +1,9 @@
 import pytest
 from datetime import date, datetime, timedelta
-from app.models.user import Role, User
+from app.models.user import  User
 from app.models.formation import Formation
 from app.models.session import SessionFormation
-
+from app.core.role import Role
 
 def test_create_inscription(client, db):
     # 1. Créer une formation

@@ -4,10 +4,11 @@ from sqlalchemy import create_engine, StaticPool
 from sqlalchemy.orm import sessionmaker
 from app.db.database import Base, get_db
 from app.main import app
-from app.models.user import User, Role
+from app.models.user import User
 from app.models.formation import Formation
 from app.models.session import SessionFormation
 from app.models.inscription import Inscription
+from app.core.role import Role
 
 # Database de test en mémoire
 SQLALCHEMY_DATABASE_URL = "sqlite:///:memory:"

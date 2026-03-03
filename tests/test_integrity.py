@@ -1,9 +1,10 @@
 import pytest
 from datetime import date, datetime, timedelta
-from app.models.user import Role, User
+from app.models.user import  User
 from app.models.formation import Formation
 from app.models.session import SessionFormation
 from app.models.inscription import Inscription
+from app.core.role import Role
 
 def test_delete_user_cascades_inscriptions(client, db):
     # Setup: Create formation, teacher, student, session, and inscription
