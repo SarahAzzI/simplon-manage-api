@@ -1,6 +1,7 @@
 import pytest
 from datetime import datetime
-from app.models.user import Role
+from app.models.user import User
+from app.core.role import Role
 
 
 def test_create_user(client, db):
