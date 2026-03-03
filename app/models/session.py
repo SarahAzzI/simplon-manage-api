@@ -5,14 +5,14 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.db.database import Base
 
 
-from enum import Enum as PyEnum
+from enum import StrEnum
 
 
-class SessionStatus(PyEnum):
-    PLANIFIEE = "planifiée"
-    EN_COURS = "en_cours"
-    TERMINEE = "terminée"
-    ANNULEE = "annulée"
+class SessionStatus(StrEnum):
+    PLANNED = "planifiée"
+    IN_PROGRESS = "en_cours"
+    COMPLETED = "terminée"
+    CANCELLED = "annulée"
 
 
 class SessionFormation(Base):
@@ -30,8 +30,8 @@ class SessionFormation(Base):
     date_debut: Mapped[date] = mapped_column(Date, nullable=False)
     date_fin: Mapped[date] = mapped_column(Date, nullable=False)
     capacite_max: Mapped[int] = mapped_column(Integer, nullable=False)
-    statut: Mapped[SessionStatus] = mapped_column(
-        nullable=False, default=SessionStatus.PLANIFIEE
+    statut: Mapped[str] = mapped_column(
+        nullable=False, default=SessionStatus.PLANNED.value
     )
 
     created_at: Mapped[datetime] = mapped_column(

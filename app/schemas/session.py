@@ -15,7 +15,7 @@ class SessionBase(BaseModel):
     date_debut: date
     date_fin: date
     capacite_max: int
-    statut: SessionStatus = SessionStatus.PLANIFIEE
+    statut: str = SessionStatus.PLANNED.value
 
 
 # ── CRÉATION ──
@@ -35,7 +35,7 @@ class SessionUpdate(BaseModel):
     date_debut: Optional[date] = None
     date_fin: Optional[date] = None
     capacite_max: Optional[int] = None
-    statut: Optional[SessionStatus] = None
+    statut: Optional[str] = None
 
     @field_validator("capacite_max")
     @classmethod
