@@ -4,7 +4,7 @@ from datetime import datetime
 from typing import Optional, List
 from app.core.level import Level
 
-# --- BASE ---
+
 class FormationBase(BaseModel):
     """Champs communs à la création et la lecture."""
     title: str = Field(min_length=2, max_length=100)
@@ -12,7 +12,7 @@ class FormationBase(BaseModel):
     duration: int
     level: Level
 
-# --- CREATE ---
+
 class FormationCreate(FormationBase):
     """Schéma pour la création (tous les champs obligatoires)."""
     pass

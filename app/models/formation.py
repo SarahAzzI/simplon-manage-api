@@ -2,14 +2,6 @@ from sqlalchemy import Column, Integer, String, DateTime, Index
 from sqlalchemy.sql import func
 from sqlalchemy.orm import relationship
 from app.db.database import Base
-from sqlalchemy import Enum as SAEnum
-from enum import Enum
-
-class Niveau(str, Enum):
-    """Enum pour les niveaux de formation."""
-    BEGINNER = "débutant"
-    INTERMEDIATE = "intermédiaire"
-    ADVANCED = "avancé"
 
 class Formation(Base):
     __tablename__ = "formations"

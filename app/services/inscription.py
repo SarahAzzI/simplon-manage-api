@@ -1,6 +1,6 @@
 from sqlalchemy.orm import Session, joinedload
 from sqlalchemy import select, func
-from app.models.inscription import Inscription, StatutInscription
+from app.models.inscription import Inscription
 from app.models.session import SessionFormation
 from app.core.role import Role
 from app.schemas.inscription import InscriptionCreate, InscriptionUpdate
