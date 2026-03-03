@@ -5,10 +5,7 @@ from enum import Enum
 from datetime import datetime, timezone
 from sqlalchemy.orm import relationship
 
-class Role(Enum):
-    STUDENT = "Etudiant"
-    TEACHER = "Formateur"
-    ADMIN = "Administrateur"
+
 
 class User(Base):
     __tablename__ = "users"
@@ -18,7 +15,7 @@ class User(Base):
     surname = Column(String, nullable=False)
     name = Column(String, nullable=False)
     birth_date = Column(DateTime, nullable=False)
-    role = Column(SAEnum(Role), nullable=False)
+    role = Column(String, nullable=False)
     inscription_date = Column(DateTime, default=lambda: datetime.now(timezone.utc))
     is_active = Column(Boolean, default=True)  # True for actif, False for inactif. 
 
