@@ -8,7 +8,7 @@ from app.models.inscription import Inscription
 from app.core.role import  Role  
 from app.schemas.session import SessionCreate, SessionUpdate
 from app.core.exceptions import NotFoundException, BadRequestException
-
+from app.models.user import User
 
 class SessionService:
 
