@@ -7,9 +7,9 @@ from app.models.formation import Niveau
 # --- BASE ---
 class FormationBase(BaseModel):
     """Champs communs à la création et la lecture."""
-    title: str = Field(min_length=5, max_length=100)
-    description: str = Field(min_length=20, max_length=500)
-    duration: int = Field(gt=0)  # Doit être > 0
+    title: str = Field(min_length=2, max_length=100)
+    description: str = Field(min_length=5, max_length=500)
+    duration: int
     level: Niveau
 
 # --- CREATE ---
@@ -20,9 +20,9 @@ class FormationCreate(FormationBase):
 # --- UPDATE ---
 class FormationUpdate(BaseModel):
     """Schéma pour la mise à jour (tous les champs optionnels)."""
-    title: Optional[str] = Field(None, min_length=5, max_length=100)
-    description: Optional[str] = Field(None, min_length=20, max_length=500)
-    duration: Optional[int] = Field(None, gt=0)
+    title: Optional[str] = Field(None, min_length=2, max_length=100)
+    description: Optional[str] = Field(None, min_length=5, max_length=500)
+    duration: Optional[int]
     level: Optional[Niveau] = None
 
 # --- READ ---
