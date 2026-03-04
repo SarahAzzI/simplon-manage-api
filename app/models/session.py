@@ -20,7 +20,6 @@ class SessionFormation(Base):
     date_debut: Mapped[date] = mapped_column(Date, nullable=False)
     date_fin: Mapped[date] = mapped_column(Date, nullable=False)
     capacite_max: Mapped[int] = mapped_column(Integer, nullable=False)
-    capacite_minimale: Mapped[int] = mapped_column(Integer, nullable=False, default=1)
     statut: Mapped[str] = mapped_column(
         String, nullable=False, default="planifiée"
     )
@@ -35,11 +34,6 @@ class SessionFormation(Base):
     __table_args__ = (
         CheckConstraint("date_fin > date_debut", name="check_dates_coherentes"),
         CheckConstraint("capacite_max >= 1", name="check_capacite_positive"),
-        CheckConstraint("capacite_minimale >= 1", name="check_capacite_min_positive"),
-        CheckConstraint(
-            "capacite_max >= capacite_minimale",
-            name="check_capacite_max_gte_min",
-        ),
     )
 
     # Relations

@@ -91,16 +91,11 @@ class SessionService:
 
         FormationService.get_by_id(db, data.formation_id)
 
-        # Valider la cohérence métier
+        # Valider la cohérence métier (sans lier d'étudiants)
         SessionService._validate_session(
-            db,
-            data.date_debut,
-            data.date_fin,
-            data.capacite_max,
-            data.capacite_minimale,
+            db, data.date_debut, data.date_fin, data.capacite_max
         )
 
-        # create (without linking students)
         session = SessionFormation(**data.model_dump())
         db.add(session)
         db.commit()
@@ -131,17 +126,12 @@ class SessionService:
 
         update_data = data.model_dump(exclude_unset=True)
 
-        # Valider la cohérence métier (dates, capacité max et min)
+        # Valider la cohérence métier (dates et capacité)
         new_debut = update_data.get("date_debut", session.date_debut)
         new_fin = update_data.get("date_fin", session.date_fin)
-        new_capacite_max = update_data.get("capacite_max", session.capacite_max)
-        new_capacite_min = update_data.get(
-            "capacite_minimale", session.capacite_minimale
-        )
+        new_capacite = update_data.get("capacite_max", session.capacite_max)
 
-        SessionService._validate_session(
-            db, new_debut, new_fin, new_capacite_max, new_capacite_min, session_id
-        )
+        SessionService._validate_session(db, new_debut, new_fin, new_capacite, session_id)
 
         # Appliquer
         for key, value in update_data.items():
@@ -173,7 +163,6 @@ class SessionService:
         date_debut: date,
         date_fin: date,
         capacite_max: int,
-        capacite_minimale: int = 1,
         session_id: Optional[int] = None,
     ) -> None:
         """
@@ -181,24 +170,20 @@ class SessionService:
         vérifiées par le schéma Pydantic seul (ou pour garantir la sécurité du service).
         """
 
-        #  Cohérence des dates
+        # 1. Cohérence des dates
         if date_fin <= date_debut:
             raise BadRequestException(
                 "La date de fin doit être postérieure à la date de début"
             )
 
-        #  Cohérence capacité max >= capacité minimale
-        if capacite_max < capacite_minimale:
+        # 2. Capacité minimale métier (gérée ici, pas en base)
+        CAPACITE_MINIMALE = 1
+        if capacite_max < CAPACITE_MINIMALE:
             raise BadRequestException(
-                f"La capacité maximale ({capacite_max}) doit être supérieure "
-                f"ou égale à la capacité minimale ({capacite_minimale})."
+                f"La capacité doit être au moins de {CAPACITE_MINIMALE}."
             )
 
-        #  Cohérence capacité minimale >= 1
-        if capacite_minimale < 1:
-            raise BadRequestException("La capacité minimale doit être au moins de 1.")
-
-        #  Cohérence capacité (si session existante)
+        # 3. Cohérence capacité vs inscrits (si session existante)
         if session_id is not None:
             nb_inscrits = SessionService.count_inscrits(db, session_id)
             if capacite_max < nb_inscrits:
@@ -206,6 +191,3 @@ class SessionService:
                     f"Impossible de réduire la capacité : {nb_inscrits} apprenants "
                     f"sont déjà inscrits à cette session."
                 )
-        elif capacite_max < 1:
-            # Sécurité supplémentaire si le schéma est contourné
-            raise BadRequestException("La capacité doit être au moins de 1.")

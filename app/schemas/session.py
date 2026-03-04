@@ -13,7 +13,6 @@ class SessionBase(BaseModel):
     date_debut: date
     date_fin: date
     capacite_max: int
-    capacite_minimale: int = 1
     statut: SessionStatus = SessionStatus.PLANNED
 
 
@@ -26,13 +25,6 @@ class SessionCreate(SessionBase):
             raise ValueError("La capacité maximale doit être >= 1")
         return v
 
-    @field_validator("capacite_minimale")
-    @classmethod
-    def capacite_min_valide(cls, v: int) -> int:
-        if v < 1:
-            raise ValueError("La capacité minimale doit être >= 1")
-        return v
-
 
 # update (PATCH)
 class SessionUpdate(BaseModel):
@@ -41,7 +33,6 @@ class SessionUpdate(BaseModel):
     date_debut: Optional[date] = None
     date_fin: Optional[date] = None
     capacite_max: Optional[int] = None
-    capacite_minimale: Optional[int] = None
     statut: Optional[SessionStatus] = None
 
     @field_validator("capacite_max")
@@ -49,13 +40,6 @@ class SessionUpdate(BaseModel):
     def capacite_max_valide(cls, v: Optional[int]) -> Optional[int]:
         if v is not None and v < 1:
             raise ValueError("La capacité maximale doit être >= 1")
-        return v
-
-    @field_validator("capacite_minimale")
-    @classmethod
-    def capacite_min_valide(cls, v: Optional[int]) -> Optional[int]:
-        if v is not None and v < 1:
-            raise ValueError("La capacité minimale doit être >= 1")
         return v
 
 
