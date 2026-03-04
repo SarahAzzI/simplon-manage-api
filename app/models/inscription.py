@@ -10,14 +10,6 @@ from sqlalchemy import (
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 from app.db.database import Base
-from enum import Enum
-
-
-class StatutInscription(Enum):
-    EN_ATTENTE = "en_attente"
-    CONFIRME = "confirmé"
-    ANNULE = "annulé"
-    TERMINE = "terminé"
 
 
 class Inscription(Base):
@@ -38,9 +30,7 @@ class Inscription(Base):
     date_inscription = Column(
         DateTime(timezone=True), server_default=func.now(), nullable=False
     )
-    statut = Column(
-        String(50), default=StatutInscription.EN_ATTENTE.value, nullable=False
-    )
+    statut = Column(String, nullable=False)
 
     created_at = Column(
         DateTime(timezone=True), server_default=func.now(), nullable=False

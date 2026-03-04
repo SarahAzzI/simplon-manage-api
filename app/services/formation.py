@@ -21,6 +21,7 @@ class FormationService:
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail=f"Une formation avec le titre {formation_data.title} existe déjà"
             )
+
         try:
             new_formation = Formation(
             title=formation_data.title,
@@ -36,7 +37,7 @@ class FormationService:
             db.rollback()
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Erreur d'intégrité, impossible de créer l'utilisateur"
+                detail="Erreur d'intégrité, impossible de créer la formation"
             )
         
 
@@ -60,32 +61,31 @@ class FormationService:
     def update(
         db: Session, formation_id: int, formation_data: FormationUpdate
     ) -> Formation:
+        
         formation = FormationService.get_by_id(db, formation_id)
 
-        if not formation:
-            raise Exception(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail=f"La formation avec l'id {formation_id} non trouvé"
+        if formation_data.duration is not None and formation_data.duration <= 0:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="La durée de la formation doit être supérieure à 0"
             )
         
-        try:
-            if formation_data.duration <= 0:
+        if formation_data.title is not None:
+            existing_formation = db.query(Formation).filter(
+                    Formation.title == formation_data.title,
+                    Formation.id != formation_id # Exclu le titre de la formation actuelle
+            ).first()
+
+            if existing_formation:
                 raise HTTPException(
                     status_code=status.HTTP_400_BAD_REQUEST,
-                    detail="La durée de la formation doit être supérieure à 0"
-                )
-            
-            existing_formation = db.query(Formation).filter(Formation.title == formation_data.title).first()
+                    detail=f"Une formation avec le titre {formation_data.title} existe déjà"
+                )   
         
-            if existing_formation:
-                if existing_formation:
-                    raise HTTPException(
-                        status_code=status.HTTP_400_BAD_REQUEST,
-                        detail="Une formation avec ce titre existe déjà"
-                    )
-
+        try:
 
             update_data = formation_data.model_dump(exclude_unset=True)
+
             for key, value in update_data.items():
                 setattr(formation, key, value)
 
@@ -104,11 +104,7 @@ class FormationService:
     def delete(db: Session, formation_id: int) -> None:
 
         formation = FormationService.get_by_id(db, formation_id)
-        if formation is None:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail=f"La formation avec l'id {formation_id} n'existe pas."
-            )
+
         try:
 
             db.delete(formation)
@@ -117,5 +113,5 @@ class FormationService:
             db.rollback()
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=f"Une erreur inattendue est survenue : {str(e)}"
+                detail="Une erreur inattendue est survenue lors de la suppression."
             )

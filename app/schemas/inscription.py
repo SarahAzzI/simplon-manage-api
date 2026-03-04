@@ -4,13 +4,13 @@ from typing import Optional
 
 from app.schemas.user import UserResponse
 from app.schemas.session import SessionResponse
+from app.core.statutInscription import StatutInscription
 
 
 class InscriptionBase(BaseModel):
     """Base schema with common inscription fields."""
 
-    statut: str = Field(default="en_attente", max_length=50)
-
+    statut: StatutInscription
 
 class InscriptionCreate(InscriptionBase):
     """Schema for creating a new inscription."""
@@ -22,7 +22,7 @@ class InscriptionCreate(InscriptionBase):
 class InscriptionUpdate(BaseModel):
     """Schema for updating inscription - all fields optional."""
 
-    statut: Optional[str] = Field(None, max_length=50)
+    statut: Optional[StatutInscription] 
 
 
 class InscriptionResponse(InscriptionBase):

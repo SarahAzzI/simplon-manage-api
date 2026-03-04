@@ -2,17 +2,17 @@
 from pydantic import BaseModel, Field, ConfigDict
 from datetime import datetime
 from typing import Optional, List
-from app.models.formation import Niveau
+from app.core.level import Level
 
-# --- BASE ---
+
 class FormationBase(BaseModel):
     """Champs communs à la création et la lecture."""
     title: str = Field(min_length=2, max_length=100)
     description: str = Field(min_length=5, max_length=500)
     duration: int
-    level: Niveau
+    level: Level
 
-# --- CREATE ---
+
 class FormationCreate(FormationBase):
     """Schéma pour la création (tous les champs obligatoires)."""
     pass
@@ -23,7 +23,7 @@ class FormationUpdate(BaseModel):
     title: Optional[str] = Field(None, min_length=2, max_length=100)
     description: Optional[str] = Field(None, min_length=5, max_length=500)
     duration: Optional[int]
-    level: Optional[Niveau] = None
+    level: Optional[Level] = None
 
 # --- READ ---
 class FormationResponse(FormationBase):
