@@ -1,4 +1,5 @@
 import math
+from typing import List
 from fastapi import APIRouter, Depends, Query, status
 from sqlalchemy.orm import Session
 from app.db.database import get_db
@@ -20,6 +21,10 @@ def create_inscription(data: InscriptionCreate, db: Session = Depends(get_db)):
     """Inscrire un apprenant à une session."""
     return InscriptionService.create(db, data)
 
+@router.get(
+        "/inscriptions", response_model=List[InscriptionResponse])
+def get_all_inscriptions(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
+    return InscriptionService.get_all(db, skip=skip, limit=limit)
 
 @router.get(
     "/session/{session_id}", response_model=PaginatedResponse[InscriptionResponse]
