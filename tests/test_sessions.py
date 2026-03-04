@@ -2,7 +2,7 @@ from datetime import date, timedelta
 from app.core.role import Role
 
 def test_create_session(client, db):
-    # 1. Create a formation
+    #  Create a formation
     form_resp = client.post(
         "/formations/",
         json={
@@ -14,7 +14,7 @@ def test_create_session(client, db):
     )
     form_id = form_resp.json()["id"]
 
-    # 2. Create a teacher
+    #  Create a teacher
     teach_resp = client.post(
         "/utilisateurs/",
         json={
@@ -27,7 +27,7 @@ def test_create_session(client, db):
     )
     teach_id = teach_resp.json()["id"]
 
-    # 3. Create session
+    #  Create session
     today = date.today()
     response = client.post(
         "/sessions/",
@@ -91,7 +91,7 @@ def test_update_session(client, db):
 
     # Update capacity and dates
     new_fin = (date.today() + timedelta(days=10)).isoformat()
-    response = client.put(
+    response = client.patch(
         f"/sessions/{sess_id}", json={"capacite_max": 20, "date_fin": new_fin}
     )
     assert response.status_code == 200
@@ -449,7 +449,7 @@ def test_update_session_invalid_role(client, db):
         },
     ).json()["id"]
 
-    resp = client.put(f"/sessions/{s_id}", json={"formateur_id": st_id})
+    resp = client.patch(f"/sessions/{s_id}", json={"formateur_id": st_id})
     assert resp.status_code == 400
     assert "rôle formateur" in resp.json()["detail"]
 
@@ -486,7 +486,7 @@ def test_update_session_invalid_formation(client, db):
         },
     ).json()["id"]
 
-    resp = client.put(f"/sessions/{s_id}", json={"formation_id": 99999})
+    resp = client.patch(f"/sessions/{s_id}", json={"formation_id": 99999})
     assert resp.status_code == 404
 
 
@@ -535,7 +535,7 @@ def test_update_session_invalid_capacity_reduction(client, db):
         ).json()["id"]
         client.post("/inscriptions/", json={"session_id": s_id, "user_id": st_id})
 
-    resp = client.put(f"/sessions/{s_id}", json={"capacite_max": 4})
+    resp = client.patch(f"/sessions/{s_id}", json={"capacite_max": 4})
     assert resp.status_code == 400
     assert "Impossible de réduire la capacité" in resp.json()["detail"]
 
@@ -575,10 +575,10 @@ def test_session_statut_flow(client, db):
     s_id = resp.json()["id"]
     assert resp.json()["statut"] == "planifiée"
 
-    resp = client.put(f"/sessions/{s_id}", json={"statut": "en_cours"})
+    resp = client.patch(f"/sessions/{s_id}", json={"statut": "en_cours"})
     assert resp.json()["statut"] == "en_cours"
 
-    resp = client.put(f"/sessions/{s_id}", json={"statut": "terminée"})
+    resp = client.patch(f"/sessions/{s_id}", json={"statut": "terminée"})
     assert resp.json()["statut"] == "terminée"
 
 
@@ -667,7 +667,7 @@ def test_update_session_non_existent_teacher(client, db):
         },
     ).json()["id"]
 
-    resp = client.put(f"/sessions/{s_id}", json={"formateur_id": 99999})
+    resp = client.patch(f"/sessions/{s_id}", json={"formateur_id": 99999})
     assert resp.status_code == 404
 
 

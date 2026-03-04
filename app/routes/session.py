@@ -16,6 +16,7 @@ from app.services.session import SessionService
 router = APIRouter(prefix="/sessions", tags=["Sessions"])
 
 
+# LISTER
 @router.get("/", response_model=PaginatedResponse[SessionResponse])
 def lister_sessions(
     page: int = Query(1, ge=1),
@@ -41,6 +42,7 @@ def lister_sessions(
     )
 
 
+# OBTENIR PAR ID
 @router.get("/{session_id}", response_model=SessionDetailResponse)
 def obtenir_session(session_id: int, db: Session = Depends(get_db)):
     session = SessionService.get_by_id(db, session_id)
@@ -50,18 +52,21 @@ def obtenir_session(session_id: int, db: Session = Depends(get_db)):
     return result
 
 
+# CRÉER
 @router.post("/", response_model=SessionResponse, status_code=status.HTTP_201_CREATED)
 def creer_session(data: SessionCreate, db: Session = Depends(get_db)):
     return SessionService.create(db, data)
 
 
-@router.put("/{session_id}", response_model=SessionResponse)
+# MODIFIER (PATCH)
+@router.patch("/{session_id}", response_model=SessionResponse)
 def modifier_session(
     session_id: int, data: SessionUpdate, db: Session = Depends(get_db)
 ):
     return SessionService.update(db, session_id, data)
 
 
+# SUPPRIMER
 @router.delete("/{session_id}", status_code=status.HTTP_204_NO_CONTENT)
 def supprimer_session(session_id: int, db: Session = Depends(get_db)):
     SessionService.delete(db, session_id)

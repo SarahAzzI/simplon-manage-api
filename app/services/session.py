@@ -5,10 +5,11 @@ from sqlalchemy import select, func
 
 from app.models.session import SessionFormation
 from app.models.inscription import Inscription
-from app.core.role import  Role  
+from app.core.role import Role
 from app.schemas.session import SessionCreate, SessionUpdate
 from app.core.exceptions import NotFoundException, BadRequestException
 from app.models.user import User
+
 
 class SessionService:
 
@@ -52,7 +53,7 @@ class SessionService:
 
         return result, total
 
-    # ── OBTENIR PAR ID ──
+    # get by ID
     @staticmethod
     def get_by_id(db: Session, session_id: int) -> SessionFormation:
 
@@ -70,7 +71,7 @@ class SessionService:
 
         return session
 
-    # ── CRÉER ──
+    # create
     @staticmethod
     def create(db: Session, data: SessionCreate) -> SessionFormation:
 
@@ -79,7 +80,6 @@ class SessionService:
         if not formateur:
             raise NotFoundException("Formateur", data.formateur_id)
 
-        # Vérifier que c'est bien un formateur
         # Vérifier que c'est bien un formateur
         if formateur.role != Role.TEACHER:
             raise BadRequestException(
@@ -93,17 +93,21 @@ class SessionService:
 
         # Valider la cohérence métier
         SessionService._validate_session(
-            db, data.date_debut, data.date_fin, data.capacite_max
+            db,
+            data.date_debut,
+            data.date_fin,
+            data.capacite_max,
+            data.capacite_minimale,
         )
 
-        # Créer
+        # create (without linking students)
         session = SessionFormation(**data.model_dump())
         db.add(session)
         db.commit()
         db.refresh(session)
         return session
 
-    # ── MODIFIER ──
+    # update
     @staticmethod
     def update(db: Session, session_id: int, data: SessionUpdate) -> SessionFormation:
 
@@ -127,13 +131,16 @@ class SessionService:
 
         update_data = data.model_dump(exclude_unset=True)
 
-        # Valider la cohérence métier (dates et capacité)
+        # Valider la cohérence métier (dates, capacité max et min)
         new_debut = update_data.get("date_debut", session.date_debut)
         new_fin = update_data.get("date_fin", session.date_fin)
-        new_capacite = update_data.get("capacite_max", session.capacite_max)
+        new_capacite_max = update_data.get("capacite_max", session.capacite_max)
+        new_capacite_min = update_data.get(
+            "capacite_minimale", session.capacite_minimale
+        )
 
         SessionService._validate_session(
-            db, new_debut, new_fin, new_capacite, session_id
+            db, new_debut, new_fin, new_capacite_max, new_capacite_min, session_id
         )
 
         # Appliquer
@@ -144,14 +151,14 @@ class SessionService:
         db.refresh(session)
         return session
 
-    # ── SUPPRIMER ──
+    # delete
     @staticmethod
     def delete(db: Session, session_id: int) -> None:
         session = SessionService.get_by_id(db, session_id)
         db.delete(session)
         db.commit()
 
-    # ── COMPTER INSCRITS ──
+    # count students
     @staticmethod
     def count_inscrits(db: Session, session_id: int) -> int:
         return (
@@ -159,13 +166,14 @@ class SessionService:
             or 0
         )
 
-    # ── VALIDATION MÉTIER CENTRALISÉE ──
+    # centralized business validation
     @staticmethod
     def _validate_session(
         db: Session,
         date_debut: date,
         date_fin: date,
         capacite_max: int,
+        capacite_minimale: int = 1,
         session_id: Optional[int] = None,
     ) -> None:
         """
@@ -173,13 +181,24 @@ class SessionService:
         vérifiées par le schéma Pydantic seul (ou pour garantir la sécurité du service).
         """
 
-        # 1. Cohérence des dates
+        #  Cohérence des dates
         if date_fin <= date_debut:
             raise BadRequestException(
                 "La date de fin doit être postérieure à la date de début"
             )
 
-        # 2. Cohérence capacité (si session existante)
+        #  Cohérence capacité max >= capacité minimale
+        if capacite_max < capacite_minimale:
+            raise BadRequestException(
+                f"La capacité maximale ({capacite_max}) doit être supérieure "
+                f"ou égale à la capacité minimale ({capacite_minimale})."
+            )
+
+        #  Cohérence capacité minimale >= 1
+        if capacite_minimale < 1:
+            raise BadRequestException("La capacité minimale doit être au moins de 1.")
+
+        #  Cohérence capacité (si session existante)
         if session_id is not None:
             nb_inscrits = SessionService.count_inscrits(db, session_id)
             if capacite_max < nb_inscrits:

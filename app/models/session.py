@@ -1,18 +1,8 @@
 from datetime import date, datetime
-from sqlalchemy import Integer, Date, ForeignKey, CheckConstraint, DateTime
+from sqlalchemy import Integer, Date, ForeignKey, CheckConstraint, DateTime, String
 from sqlalchemy.sql import func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.db.database import Base
-
-
-from enum import StrEnum
-
-
-class SessionStatus(StrEnum):
-    PLANNED = "planifiée"
-    IN_PROGRESS = "en_cours"
-    COMPLETED = "terminée"
-    CANCELLED = "annulée"
 
 
 class SessionFormation(Base):
@@ -24,14 +14,15 @@ class SessionFormation(Base):
         nullable=False,
     )
     formateur_id: Mapped[int] = mapped_column(
-        ForeignKey("users.id", ondelete="CASCADE"),  # ← corrigé
+        ForeignKey("users.id", ondelete="CASCADE"),
         nullable=False,
     )
     date_debut: Mapped[date] = mapped_column(Date, nullable=False)
     date_fin: Mapped[date] = mapped_column(Date, nullable=False)
     capacite_max: Mapped[int] = mapped_column(Integer, nullable=False)
+    capacite_minimale: Mapped[int] = mapped_column(Integer, nullable=False, default=1)
     statut: Mapped[str] = mapped_column(
-        nullable=False, default=SessionStatus.PLANNED.value
+        String, nullable=False, default="planifiée"
     )
 
     created_at: Mapped[datetime] = mapped_column(
@@ -44,6 +35,11 @@ class SessionFormation(Base):
     __table_args__ = (
         CheckConstraint("date_fin > date_debut", name="check_dates_coherentes"),
         CheckConstraint("capacite_max >= 1", name="check_capacite_positive"),
+        CheckConstraint("capacite_minimale >= 1", name="check_capacite_min_positive"),
+        CheckConstraint(
+            "capacite_max >= capacite_minimale",
+            name="check_capacite_max_gte_min",
+        ),
     )
 
     # Relations
