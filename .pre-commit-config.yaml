@@ -1,10 +1,8 @@
-repos:
-  - repo: local
-    hooks:
-      - id: pytest
-        name: Run Pytest
-        entry: pytest
-        language: system
-        types: [python]
-        pass_filenames: false
-        always_run: true
+- repo: local
+  hooks:
+  - id: pytest
+    name: pytest
+    entry: ./.venv/bin/pytest
+    exclude: ^migrations
+    language: system
+    types: [python]
