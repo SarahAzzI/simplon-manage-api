@@ -15,7 +15,7 @@ def create_formation(formation: FormationCreate, db: Session = Depends(get_db)):
 
 
 @router.get("/", response_model=PaginatedResponse[FormationResponse])
-def get_formations_route(
+def get_formations(
     page: int = Query(1, ge=1),
     size: int = Query(10, ge=1, le=100),
     db: Session = Depends(get_db),
@@ -28,18 +28,18 @@ def get_formations_route(
 
 
 @router.get("/{formation_id}", response_model=FormationResponse)
-def get_formation_route(formation_id: int, db: Session = Depends(get_db)):
+def get_formation(formation_id: int, db: Session = Depends(get_db)):
     return FormationService.get_by_id(db, formation_id)
 
 
 @router.patch("/{formation_id}", response_model=FormationResponse)
-def update_formation_route(
+def update_formation(
     formation_id: int, formation: FormationUpdate, db: Session = Depends(get_db)
 ):
     return FormationService.update(db, formation_id, formation)
 
 
 @router.delete("/{formation_id}", status_code=status.HTTP_204_NO_CONTENT)
-def delete_formation_route(formation_id: int, db: Session = Depends(get_db)):
+def delete_formation(formation_id: int, db: Session = Depends(get_db)):
     FormationService.delete(db, formation_id)
     return None

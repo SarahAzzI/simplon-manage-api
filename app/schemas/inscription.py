@@ -22,7 +22,7 @@ class InscriptionCreate(InscriptionBase):
 class InscriptionUpdate(BaseModel):
     """Schema for updating inscription - all fields optional."""
 
-    statut: Optional[StatutInscription] 
+    statut: Optional[StatutInscription] = None
 
 
 class InscriptionResponse(InscriptionBase):

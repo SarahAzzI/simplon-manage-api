@@ -22,7 +22,7 @@ class FormationUpdate(BaseModel):
     """Schéma pour la mise à jour (tous les champs optionnels)."""
     title: Optional[str] = Field(None, min_length=2, max_length=100)
     description: Optional[str] = Field(None, min_length=5, max_length=500)
-    duration: Optional[int]
+    duration: Optional[int] = None
     level: Optional[Level] = None
 
 # --- READ ---

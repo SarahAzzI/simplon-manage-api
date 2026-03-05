@@ -1,0 +1,10 @@
+repos:
+  - repo: local
+    hooks:
+      # Exemple 1 : Lancer tes tests Python (pytest/unittest)
+      - id: run-tests
+        name: Run local tests
+        entry: pytest tests/  # ou: python manage.py test
+        language: system      # utilise ton environnement Python actuel
+        pass_filenames: false
+        stages: [commit]

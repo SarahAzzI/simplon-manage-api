@@ -24,8 +24,8 @@ class Inscription(Base):
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
 
     # Foreign Keys
-    session_id = Column(Integer, ForeignKey("sessions.id"), nullable=False, index=True)
-    user_id = Column(Integer, ForeignKey("users.id"), nullable=False, index=True)
+    session_id = Column(Integer, ForeignKey("sessions.id", ondelete="CASCADE"), nullable=False, index=True)
+    user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True)
 
     date_inscription = Column(
         DateTime(timezone=True), server_default=func.now(), nullable=False

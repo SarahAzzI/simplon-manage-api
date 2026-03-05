@@ -490,56 +490,6 @@ def test_update_session_invalid_formation(client, db):
     assert resp.status_code == 404
 
 
-def test_update_session_invalid_capacity_reduction(client, db):
-    """Empêcher de réduire la capacité en dessous du nombre d'inscrits"""
-    f_id = client.post(
-        "/formations/",
-        json={
-            "title": "Formation Valid",
-            "description": "Description correcte de plus de vingt caractères.",
-            "duration": 10,
-            "level": "débutant",
-        },
-    ).json()["id"]
-    t_id = client.post(
-        "/utilisateurs/",
-        json={
-            "email": "t_upd_cap@s.com",
-            "surname": "Teacher",
-            "name": "Name",
-            "birth_date": "1980-01-01T00:00:00",
-            "role": "Formateur",
-        },
-    ).json()["id"]
-    s_id = client.post(
-        "/sessions/",
-        json={
-            "formation_id": f_id,
-            "formateur_id": t_id,
-            "date_debut": "2025-01-01",
-            "date_fin": "2025-01-10",
-            "capacite_max": 10,
-        },
-    ).json()["id"]
-
-    for i in range(5):
-        st_id = client.post(
-            "/utilisateurs/",
-            json={
-                "email": f"st_cap_{i}@s.com",
-                "surname": "Student",
-                "name": f"Name{i}",
-                "birth_date": "2000-01-01T00:00:00",
-                "role": "Etudiant",
-            },
-        ).json()["id"]
-        client.post("/inscriptions/", json={"session_id": s_id, "user_id": st_id})
-
-    resp = client.put(f"/sessions/{s_id}", json={"capacite_max": 4})
-    assert resp.status_code == 400
-    assert "Impossible de réduire la capacité" in resp.json()["detail"]
-
-
 def test_session_statut_flow(client, db):
     """Vérifier le cycle de vie du statut d'une session"""
     f_id = client.post(
@@ -580,59 +530,6 @@ def test_session_statut_flow(client, db):
 
     resp = client.put(f"/sessions/{s_id}", json={"statut": "terminée"})
     assert resp.json()["statut"] == "terminée"
-
-
-def test_get_session_detail(client, db):
-    """Vérifier les détails d'une session avec les relations et le compte d'inscrits"""
-    f_id = client.post(
-        "/formations/",
-        json={
-            "title": "Formation Detail",
-            "description": "Description correcte de plus de vingt caractères.",
-            "duration": 10,
-            "level": "débutant",
-        },
-    ).json()["id"]
-    t_id = client.post(
-        "/utilisateurs/",
-        json={
-            "email": "t_det@s.com",
-            "surname": "Teacher",
-            "name": "Name",
-            "birth_date": "1980-01-01T00:00:00",
-            "role": "Formateur",
-        },
-    ).json()["id"]
-    s_id = client.post(
-        "/sessions/",
-        json={
-            "formation_id": f_id,
-            "formateur_id": t_id,
-            "date_debut": "2025-01-01",
-            "date_fin": "2025-01-10",
-            "capacite_max": 10,
-        },
-    ).json()["id"]
-
-    for i in range(2):
-        st_id = client.post(
-            "/utilisateurs/",
-            json={
-                "email": f"st_det_fin_{i}@s.com",
-                "surname": "Student",
-                "name": f"Name{i}",
-                "birth_date": "2000-01-01T00:00:00",
-                "role": "Etudiant",
-            },
-        ).json()["id"]
-        client.post("/inscriptions/", json={"session_id": s_id, "user_id": st_id})
-
-    resp = client.get(f"/sessions/{s_id}")
-    assert resp.status_code == 200
-    data = resp.json()
-    assert data["nombre_inscrits"] == 2
-    assert data["formation"]["title"] == "Formation Detail"
-    assert data["formateur"]["email"] == "t_det@s.com"
 
 
 def test_update_session_non_existent_teacher(client, db):

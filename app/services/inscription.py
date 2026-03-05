@@ -27,6 +27,15 @@ class InscriptionService:
         if not session:
             raise NotFoundException("Session", data.session_id)
 
+        # Vérifier si l'apprenant est DÉJÀ INSCRIT À UNE SESSION (n'importe laquelle)
+        existing_anywhere = db.scalar(
+            select(Inscription).where(Inscription.user_id == data.user_id)
+        )
+        if existing_anywhere:
+            raise BadRequestException(
+                "Un apprenant ne peut être inscrit qu'à une seule session à la fois."
+            )
+
         # 4. Vérifier si l'apprenant est déjà inscrit
         existing = db.scalar(
             select(Inscription).where(
@@ -50,6 +59,22 @@ class InscriptionService:
         db.commit()
         db.refresh(inscription)
         return inscription
+
+    @staticmethod
+    def get_all(db: Session, skip: int = 0, limit: int = 100) -> list[Inscription]:
+        """
+        Récupère toutes les inscriptions avec pagination et jointures pour récupérer
+        l'utilisateur et la session associée.
+        """
+        return db.scalars(
+            select(Inscription)
+            .options(
+                joinedload(Inscription.user),  # Jointure avec l'utilisateur
+                joinedload(Inscription.session).joinedload(SessionFormation.formation)  # Jointure avec la session, puis la formation
+            )
+            .offset(skip)
+            .limit(limit)
+        ).all() 
 
     @staticmethod
     def get_by_session(
